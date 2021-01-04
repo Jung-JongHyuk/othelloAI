@@ -6,6 +6,7 @@ class Board:
         (self.rowSize, self.colSize, self.numOfBlock) = (rowSize, colSize, numOfBlock)
         (self.PLAYER_0, self.PLAYER_1, self.VOID, self.BLOCK) = (0, 1, 2, 3)
         self.board = [[self.VOID for col in range(colSize)] for row in range(rowSize)]
+        self.currentTurnPlayer = self.PLAYER_0
         self.placeInitialPiece()
         self.makeBlock()
 
@@ -33,13 +34,88 @@ class Board:
             coordinate = voidCoordinate[i]
             self.board[coordinate[0]][coordinate[1]] = self.BLOCK
 
-    def printBoard(self):
-        printLiterals = ["O", "#", ".", "*"]
+    def setBlock(self, blockCoordinates):
+        self.eraseBlock()
+        for coordinate in blockCoordinates:
+            self.board[coordinate[0]][coordinate[1]] = self.BLOCK
+    
+    def eraseBlock(self):
         for rowIndex in range(self.rowSize):
             for colIndex in range(self.colSize):
-                print(printLiterals[self.board[rowIndex][colIndex]], end = "")
+                if self.board[rowIndex][colIndex] == self.BLOCK:
+                    self.board[rowIndex][colIndex] = self.VOID
+
+    def counterPlayerIndex(self, playerIndex):
+        return self.PLAYER_1 if playerIndex == self.PLAYER_0 else self.PLAYER_0
+        
+    def getPlaceableCoordinates(self, playerIndex):
+        rowMoveDirections = [-1, -1, 0, 1, 1, 1, 0, -1]
+        colMoveDirections = [0, 1, 1, 1, 0, -1, -1, -1]
+        possibleCoordinates = []
+        for rowIndex in range(self.rowSize):
+            for colIndex in range(self.colSize):
+                if self.board[rowIndex][colIndex] == self.VOID:
+                    for i in range(8):
+                        if self.findWallCoordinate(rowIndex, colIndex, rowMoveDirections[i], colMoveDirections[i], playerIndex) != None:
+                            possibleCoordinates.append((rowIndex, colIndex))
+                            break
+        return possibleCoordinates
+
+    def findWallCoordinate(self, rowIndex, colIndex, rowMoveDirection, colMoveDirection, playerIndex):
+        (currentRowIndex, currentColIndex) = (rowIndex + rowMoveDirection, colIndex + colMoveDirection)
+        numOfCounterPlayerPieceBetweenWall = 0
+        while not self.isIndexOutOfRange(currentRowIndex, currentColIndex):
+            if self.board[currentRowIndex][currentColIndex] == self.counterPlayerIndex(playerIndex):
+                numOfCounterPlayerPieceBetweenWall = numOfCounterPlayerPieceBetweenWall + 1
+            elif self.board[currentRowIndex][currentColIndex] == playerIndex:
+                if numOfCounterPlayerPieceBetweenWall > 0:
+                    return (currentRowIndex, currentColIndex)
+                else:
+                    return None
+            else:
+                return None
+            (currentRowIndex, currentColIndex) = (currentRowIndex + rowMoveDirection, currentColIndex + colMoveDirection)
+        
+    def isIndexOutOfRange(self, rowIndex, colIndex):
+        return rowIndex < 0 or rowIndex >= self.rowSize or colIndex < 0 or colIndex >= self.colSize
+
+    def placePiece(self, rowIndex, colIndex, playerIndex):
+        rowMoveDirections = [-1, -1, 0, 1, 1, 1, 0, -1]
+        colMoveDirections = [0, 1, 1, 1, 0, -1, -1, -1]
+        wallCoordinates = []
+        for i in range(8):
+            wallCoordinates.append(self.findWallCoordinate(rowIndex, colIndex, rowMoveDirections[i], colMoveDirections[i], playerIndex))
+        for i in range(8):
+            if wallCoordinates[i] != None:
+                (currentRowIndex, currentColIndex) = (rowIndex + rowMoveDirections[i], colIndex + colMoveDirections[i])
+                while (currentRowIndex, currentColIndex) != wallCoordinates[i]:
+                    self.board[currentRowIndex][currentColIndex] = playerIndex
+                    (currentRowIndex, currentColIndex) = (currentRowIndex + rowMoveDirections[i], currentColIndex + colMoveDirections[i])
+        self.board[rowIndex][colIndex] = playerIndex
+        self.currentTurnPlayer = self.counterPlayerIndex(playerIndex)
+
+    def printBoard(self):
+        printLiterals = ["O", "#", "·", "*"]
+        print("  ", end = "")
+        for i in range(self.colSize):
+            print(i, end = " ")
+        print("")
+        for rowIndex in range(self.rowSize):
+            for colIndex in range(self.colSize):
+                if colIndex == 0:
+                    print(rowIndex, end = " ")
+                print(printLiterals[self.board[rowIndex][colIndex]], end = " ")
             print("")
 
 board = Board(8,8,5)
 board.printBoard()
+
+while True:
+    print("currentPlayer: ", board.currentTurnPlayer)
+    board.printBoard()
+    print(board.getPlaceableCoordinates(board.currentTurnPlayer))
+    coordinateX = int(input())
+    coordinateY = int(input())
+    board.placePiece(coordinateX, coordinateY, board.currentTurnPlayer)
+
 
