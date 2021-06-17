@@ -32,11 +32,13 @@ class MyApp(QWidget):
         for row in range(self.board.rowSize):
             for col in range(self.board.colSize):
                 self.buttons[row][col].setText(icons[self.board.board[row][col]])
+                self.buttons[row][col].setEnabled(False)
 
         placeableIcons = ["🔹", "🔸"]
         placeableCoordinates = self.board.getPlaceableCoordinates(self.board.currentTurnPlayer)
         for coordinate in placeableCoordinates:
             self.buttons[coordinate[0]][coordinate[1]].setText(placeableIcons[self.board.currentTurnPlayer])
+            self.buttons[coordinate[0]][coordinate[1]].setEnabled(True)
     
     def makePutPiece(self, rowIndex, colIndex):
         def putPiece():

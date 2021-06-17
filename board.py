@@ -107,15 +107,16 @@ class Board:
                 print(printLiterals[self.board[rowIndex][colIndex]], end = " ")
             print("")
 
-board = Board(8,8,5)
-board.printBoard()
-
-while True:
-    print("currentPlayer: ", board.currentTurnPlayer)
+if __name__ == "__main__":
+    board = Board(8,8,5)
     board.printBoard()
-    print(board.getPlaceableCoordinates(board.currentTurnPlayer))
-    coordinateX = int(input())
-    coordinateY = int(input())
-    board.placePiece(coordinateX, coordinateY, board.currentTurnPlayer)
+
+    while True:
+        print("currentPlayer: ", board.currentTurnPlayer)
+        board.printBoard()
+        print(board.getPlaceableCoordinates(board.currentTurnPlayer))
+        coordinateX = int(input())
+        coordinateY = int(input())
+        board.placePiece(coordinateX, coordinateY, board.currentTurnPlayer)
 
 
