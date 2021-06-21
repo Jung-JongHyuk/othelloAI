@@ -1,11 +1,10 @@
 from board import Board
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QGridLayout
 
-
 class MyApp(QWidget):
     def __init__(self):
         super().__init__()
-        self.board = Board(8,8,5)
+        self.board = Board((8,8),5)
         self.initUI()
 
     def initUI(self):

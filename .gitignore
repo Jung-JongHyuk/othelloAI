@@ -1,2 +1,4 @@
 .vscode/settings.json
 __pycache__/board.cpython-38.pyc
+player/__pycache__/playerInterface.cpython-38.pyc
+player/__pycache__/randomPlayer.cpython-38.pyc

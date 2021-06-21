@@ -2,10 +2,10 @@ import random
 import sys
 
 class Board:
-    def __init__(self, rowSize, colSize, numOfBlock):
-        (self.rowSize, self.colSize, self.numOfBlock) = (rowSize, colSize, numOfBlock)
+    def __init__(self, boardSize, numOfBlock):
+        (self.rowSize, self.colSize, self.numOfBlock) = (boardSize[0], boardSize[1], numOfBlock)
         (self.PLAYER_0, self.PLAYER_1, self.VOID, self.BLOCK) = (0, 1, 2, 3)
-        self.board = [[self.VOID for col in range(colSize)] for row in range(rowSize)]
+        self.board = [[self.VOID for col in range(self.colSize)] for row in range(self.rowSize)]
         self.currentTurnPlayer = self.PLAYER_0
         self.placeInitialPiece()
         self.makeBlock()
@@ -34,6 +34,7 @@ class Board:
             coordinate = voidCoordinate[i]
             self.board[coordinate[0]][coordinate[1]] = self.BLOCK
 
+    #사용자 지정 위치에 block
     def setBlock(self, blockCoordinates):
         self.eraseBlock()
         for coordinate in blockCoordinates:
@@ -79,10 +80,11 @@ class Board:
     def isIndexOutOfRange(self, rowIndex, colIndex):
         return rowIndex < 0 or rowIndex >= self.rowSize or colIndex < 0 or colIndex >= self.colSize
 
-    def placePiece(self, rowIndex, colIndex, playerIndex):
+    def placePiece(self, posToPlace, playerIndex):
         rowMoveDirections = [-1, -1, 0, 1, 1, 1, 0, -1]
         colMoveDirections = [0, 1, 1, 1, 0, -1, -1, -1]
         wallCoordinates = []
+        (rowIndex, colIndex) = posToPlace
         for i in range(8):
             wallCoordinates.append(self.findWallCoordinate(rowIndex, colIndex, rowMoveDirections[i], colMoveDirections[i], playerIndex))
         for i in range(8):
@@ -93,6 +95,18 @@ class Board:
                     (currentRowIndex, currentColIndex) = (currentRowIndex + rowMoveDirections[i], currentColIndex + colMoveDirections[i])
         self.board[rowIndex][colIndex] = playerIndex
         self.currentTurnPlayer = self.counterPlayerIndex(playerIndex)
+    
+    def getBoardStatus(self):
+        status = {"player0": 0, "player1": 0, "void": 0}
+        for row in range(self.rowSize):
+            for col in range(self.colSize):
+                if self.board[row][col] == self.PLAYER_0:
+                    status["player0"] = status["player0"] + 1
+                elif self.board[row][col] == self.PLAYER_1:
+                    status["player1"] = status["player1"] + 1
+                elif self.board[row][col] == self.VOID:
+                    status["void"] = status["void"] + 1
+        return status
 
     def printBoard(self):
         printLiterals = ["O", "#", "·", "*"]
@@ -108,7 +122,7 @@ class Board:
             print("")
 
 if __name__ == "__main__":
-    board = Board(8,8,5)
+    board = Board((8,8),5)
     board.printBoard()
 
     while True:
