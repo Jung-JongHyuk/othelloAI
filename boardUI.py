@@ -1,22 +1,26 @@
 from board import Board
+from boardUIController import BoardUIController
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QGridLayout
 
-class MyApp(QWidget):
+class BoardUI(QWidget):
     def __init__(self):
         super().__init__()
         self.board = Board((8,8),5)
-        self.initUI()
+        self.uiController = BoardUIController(self.board, self)
 
-    def initUI(self):
-        self.setWindowTitle('QPushButton')
+        #init UI element
+        self.setWindowTitle("Othello")
+        self.icons = ["🔵", "🟠", "", "❌"]
+        self.placeableIcons = ["🔹", "🔸"]
         self.buttons = [[QPushButton('', self) for col in range(self.board.colSize)] for row in range(self.board.rowSize)]
         for row in range(self.board.rowSize):
             for col in range(self.board.colSize):
                 self.buttons[row][col].setStyleSheet('QPushButton {background-color: rgb(255,255,255); font-size: 50px}')
                 self.buttons[row][col].setMaximumHeight(500)
                 self.buttons[row][col].setMaximumWidth(500)
-                self.buttons[row][col].clicked.connect(self.makePutPiece(row, col))
+                self.buttons[row][col].clicked.connect(lambda state, pos=(row,col): self.putPiece(pos))
 
+        #set layout
         layout = QGridLayout()
         for row in range(self.board.rowSize):
             for col in range(self.board.colSize):
@@ -27,25 +31,22 @@ class MyApp(QWidget):
         self.show()
 
     def updateUI(self):
-        icons = ["🔵", "🟠", "", "❌"]
         for row in range(self.board.rowSize):
             for col in range(self.board.colSize):
-                self.buttons[row][col].setText(icons[self.board.board[row][col]])
+                self.buttons[row][col].setText(self.icons[self.board.board[row][col]])
                 self.buttons[row][col].setEnabled(False)
 
-        placeableIcons = ["🔹", "🔸"]
         placeableCoordinates = self.board.getPlaceableCoordinates(self.board.currentTurnPlayer)
         for coordinate in placeableCoordinates:
-            self.buttons[coordinate[0]][coordinate[1]].setText(placeableIcons[self.board.currentTurnPlayer])
+            self.buttons[coordinate[0]][coordinate[1]].setText(self.placeableIcons[self.board.currentTurnPlayer])
             self.buttons[coordinate[0]][coordinate[1]].setEnabled(True)
     
-    def makePutPiece(self, rowIndex, colIndex):
-        def putPiece():
-            self.board.placePiece(rowIndex, colIndex, self.board.currentTurnPlayer)
-            self.updateUI()
-        return putPiece
+    def putPiece(self, pos):
+        self.board.placePiece(pos, self.board.currentTurnPlayer)
+        self.updateUI()
+
 
 if __name__ == '__main__':
     app = QApplication([])
-    ex = MyApp()
+    ex = BoardUI()
     app.exec_()

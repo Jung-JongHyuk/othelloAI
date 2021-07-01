@@ -2,14 +2,15 @@ from board import Board
 from player.playerInterface import PlayerInterface
 
 class Game:
-    def __init__(self, player0, player1, boardSize, numOfBlock):
+    def __init__(self, player0, player1, board):
         player0.setPlayerIndex(0)
         player1.setPlayerIndex(1)
         self.players = [player0, player1]
-        self.board = Board(boardSize, numOfBlock)
+        self.board = board
         self.currPlayer = self.board.PLAYER_0
     
-    def start(self):
+    # simulate entire game and return winner. If draw, return None.
+    def play(self):
         boardStatus = self.board.getBoardStatus()
         isPrevPlayerSkipped = False
         while boardStatus["void"] > 0:
@@ -23,8 +24,13 @@ class Game:
                 isPrevPlayerSkipped = True
             boardStatus = self.board.getBoardStatus()
             self.currPlayer = self.board.counterPlayerIndex(self.currPlayer)
-            self.board.printBoard()
-            print(boardStatus)
+
+        if boardStatus["player0"] > boardStatus["player1"]:
+            return self.board.PLAYER_0
+        elif boardStatus["player0"] < boardStatus["player1"]:
+            return self.board.PLAYER_1
+        else:
+            return None
 
 
 if __name__ == "__main__":
@@ -32,8 +38,13 @@ if __name__ == "__main__":
 
     player0 = RandomPlayer()
     player1 = RandomPlayer()
-    game = Game(player0, player1, (8,8), 5)
-    game.start()
+    wins = [0,0]
+    for i in range(100):
+        game = Game(player0, player1, Board((8,8), 5))
+        winner = game.play()
+        if winner != None:
+            wins[winner] = wins[winner] + 1
+    print(wins) 
             
 
 

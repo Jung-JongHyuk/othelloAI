@@ -1,5 +1,3 @@
-import board
-
 class PlayerInterface:
     def __init__(self):
         self.playerIndex = None
