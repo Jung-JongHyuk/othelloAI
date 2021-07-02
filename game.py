@@ -13,7 +13,7 @@ class Game:
     def play(self):
         boardStatus = self.board.getBoardStatus()
         isPrevPlayerSkipped = False
-        while boardStatus["void"] > 0:
+        while boardStatus[-1] > 0:
             posToPlace = self.players[self.currPlayer].decide(self.board)
             if posToPlace != None:
                 self.board.placePiece(posToPlace, self.currPlayer)
@@ -25,9 +25,9 @@ class Game:
             boardStatus = self.board.getBoardStatus()
             self.currPlayer = self.board.counterPlayerIndex(self.currPlayer)
 
-        if boardStatus["player0"] > boardStatus["player1"]:
+        if boardStatus[self.board.PLAYER_0] > boardStatus[self.board.PLAYER_1]:
             return self.board.PLAYER_0
-        elif boardStatus["player0"] < boardStatus["player1"]:
+        elif boardStatus[self.board.PLAYER_0] < boardStatus[self.board.PLAYER_1]:
             return self.board.PLAYER_1
         else:
             return None

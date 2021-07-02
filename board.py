@@ -96,16 +96,15 @@ class Board:
         self.board[rowIndex][colIndex] = playerIndex
         self.currentTurnPlayer = self.counterPlayerIndex(playerIndex)
     
+    # return board status [player0 piece size, player1 piece size, ... void size]
     def getBoardStatus(self):
-        status = {"player0": 0, "player1": 0, "void": 0}
+        status = [0, 0, 0]
         for row in range(self.rowSize):
             for col in range(self.colSize):
-                if self.board[row][col] == self.PLAYER_0:
-                    status["player0"] = status["player0"] + 1
-                elif self.board[row][col] == self.PLAYER_1:
-                    status["player1"] = status["player1"] + 1
+                if self.board[row][col] == self.PLAYER_0 or self.board[row][col] == self.PLAYER_1:
+                    status[self.board[row][col]] = status[self.board[row][col]] + 1
                 elif self.board[row][col] == self.VOID:
-                    status["void"] = status["void"] + 1
+                    status[-1] = status[-1] + 1
         return status
 
     def printBoard(self):
