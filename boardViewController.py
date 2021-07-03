@@ -1,12 +1,16 @@
 from board import Board
 from game import Game
 from boardView import BoardView
+from player.humanPlayer import HumanPlayer
+from player.randomPlayer import RandomPlayer
 
 class BoardViewController:
     def __init__(self, boardSize, numOfBlank):
-        self.board = Board(boardSize, numOfBlank)
-        self.view = BoardView(boardSize)
         self.boardSize = boardSize
+        self.view = BoardView(boardSize)
+        self.board = Board(boardSize, numOfBlank)
+        self.Players = (HumanPlayer(), RandomPlayer())
+        self.game = Game(self.board, self.Players)
         self.makeBoardView()
         self.updateView()
     
@@ -17,7 +21,11 @@ class BoardViewController:
                 self.view.grids[row][col].clicked.connect(lambda state, pos=(row,col): self.onGridClicked(pos))
 
     def onGridClicked(self, pos):
-        self.board.placePiece(pos, self.board.currentTurnPlayer)
+        self.game.adoptDecision(pos)
+        while not isinstance(self.game.getCurrPlayer(), HumanPlayer):
+            counterPlayerDecision = self.game.getCurrPlayer().decide(self.board)
+            print(self.game.getCurrPlayer(), counterPlayerDecision)
+            self.game.adoptDecision(counterPlayerDecision)
         self.updateView()
     
     def updateView(self):
@@ -27,7 +35,7 @@ class BoardViewController:
                 self.view.setGridText((row,col), self.view.icons[self.board.board[row][col]])
                 self.view.setGridClickEnabled((row,col), False)
 
-        placeableCoordinates = self.board.getPlaceableCoordinates(self.board.currentTurnPlayer)
+        placeableCoordinates = self.board.getPlaceableCoordinates(self.game.currPlayerIndex)
         for coordinate in placeableCoordinates:
-            self.view.setGridText(coordinate, self.view.placeableIcons[self.board.currentTurnPlayer])
+            self.view.setGridText(coordinate, self.view.placeableIcons[self.game.currPlayerIndex])
             self.view.setGridClickEnabled(coordinate, True)

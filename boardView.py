@@ -17,8 +17,8 @@ class BoardView(QWidget):
         for row in range(rowSize):
             for col in range(colSize):
                 self.grids[row][col].setStyleSheet("QPushButton {background-color: rgb(255,255,255); font-size: 50px}")
-                self.grids[row][col].setMaximumHeight(500)
-                self.grids[row][col].setMaximumWidth(500)
+                self.grids[row][col].setMaximumHeight(150)
+                self.grids[row][col].setMaximumWidth(150)
 
         #set layout
         layout = QGridLayout()
@@ -26,7 +26,7 @@ class BoardView(QWidget):
             for col in range(colSize):
                 layout.addWidget(self.grids[row][col], row, col)
         self.setLayout(layout)
-        self.setGeometry(300, 300, 300, 300)
+        self.setGeometry(0, 0, 500, 500)
         self.show()
 
     def setGridText(self, pos, text):

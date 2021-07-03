@@ -94,7 +94,7 @@ class Board:
                     self.board[currentRowIndex][currentColIndex] = playerIndex
                     (currentRowIndex, currentColIndex) = (currentRowIndex + rowMoveDirections[i], currentColIndex + colMoveDirections[i])
         self.board[rowIndex][colIndex] = playerIndex
-        self.currentTurnPlayer = self.counterPlayerIndex(playerIndex)
+        # self.currentTurnPlayer = self.counterPlayerIndex(playerIndex)
     
     # return board status [player0 piece size, player1 piece size, ... void size]
     def getBoardStatus(self):
