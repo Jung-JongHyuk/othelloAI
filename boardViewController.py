@@ -1,16 +1,18 @@
 from board import Board
 from game import Game
 from boardView import BoardView
-from player.humanPlayer import HumanPlayer
+from player.dummyPlayer import DummyPlayer
 from player.randomPlayer import RandomPlayer
+from player.alphaBetaPruningPlayer import AlphaBetaPruningPlayer
 
 class BoardViewController:
     def __init__(self, boardSize, numOfBlank):
         self.boardSize = boardSize
         self.view = BoardView(boardSize)
         self.board = Board(boardSize, numOfBlank)
-        self.Players = (HumanPlayer(), RandomPlayer())
+        self.Players = (DummyPlayer(), AlphaBetaPruningPlayer(5))
         self.game = Game(self.board, self.Players)
+        self.proceedGame()
         self.makeBoardView()
         self.updateView()
     
@@ -22,11 +24,14 @@ class BoardViewController:
 
     def onGridClicked(self, pos):
         self.game.adoptDecision(pos)
-        while not isinstance(self.game.getCurrPlayer(), HumanPlayer):
-            counterPlayerDecision = self.game.getCurrPlayer().decide(self.board)
-            print(self.game.getCurrPlayer(), counterPlayerDecision)
-            self.game.adoptDecision(counterPlayerDecision)
+        self.proceedGame()
         self.updateView()
+    
+    def proceedGame(self):
+        while not isinstance(self.game.getCurrPlayer(), DummyPlayer) and not self.game.isGameFinished:
+            nonHumanPlayerDecision = self.game.getCurrPlayer().decide(self.board)
+            print(self.game.getCurrPlayer(), nonHumanPlayerDecision)
+            self.game.adoptDecision(nonHumanPlayerDecision)
     
     def updateView(self):
         (rowSize, colSize) = self.boardSize

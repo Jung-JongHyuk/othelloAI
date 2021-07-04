@@ -108,7 +108,7 @@ class Board:
         return status
 
     def printBoard(self):
-        printLiterals = ["O", "#", "·", "*"]
+        printLiterals = ["O", "#", " ", "*"]
         print("  ", end = "")
         for i in range(self.colSize):
             print(i, end = " ")

@@ -6,3 +6,5 @@ __pycache__/game.cpython-38.pyc
 __pycache__/boardView.cpython-38.pyc
 __pycache__/boardViewController.cpython-38.pyc
 player/__pycache__/humanPlayer.cpython-38.pyc
+player/__pycache__/alphaBetaPruningPlayer.cpython-38.pyc
+player/__pycache__/dummyPlayer.cpython-38.pyc
