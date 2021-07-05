@@ -6,7 +6,7 @@ class Board:
         (self.rowSize, self.colSize, self.numOfBlock) = (boardSize[0], boardSize[1], numOfBlock)
         (self.PLAYER_0, self.PLAYER_1, self.VOID, self.BLOCK) = (0, 1, 2, 3)
         self.board = [[self.VOID for col in range(self.colSize)] for row in range(self.rowSize)]
-        self.currentTurnPlayer = self.PLAYER_0
+        # self.currentTurnPlayer = self.PLAYER_0
         self.placeInitialPiece()
         self.makeBlock()
 

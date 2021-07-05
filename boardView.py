@@ -16,7 +16,7 @@ class BoardView(QWidget):
         self.grids = [[QPushButton('', self) for col in range(colSize)] for row in range(rowSize)]
         for row in range(rowSize):
             for col in range(colSize):
-                self.grids[row][col].setStyleSheet("QPushButton {background-color: rgb(255,255,255); font-size: 50px; width: 50px; height: 50px}")
+                self.grids[row][col].setStyleSheet("QPushButton {background-color: rgba(0,100,0,0.1); font-size: 50px; width: 50px; height: 50px}")
                 self.grids[row][col].setMaximumHeight(500)
                 # self.grids[row][col].setMaximumWidth(150)
 
