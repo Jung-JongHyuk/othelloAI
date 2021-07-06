@@ -4,13 +4,14 @@ from boardView import BoardView
 from player.dummyPlayer import DummyPlayer
 from player.randomPlayer import RandomPlayer
 from player.alphaBetaPruningPlayer import AlphaBetaPruningPlayer
+from player.aiPlayer import AIPlayer
 
 class BoardViewController:
     def __init__(self, boardSize, numOfBlank):
         self.boardSize = boardSize
         self.view = BoardView(boardSize)
         self.board = Board(boardSize, numOfBlank)
-        self.Players = (DummyPlayer(), AlphaBetaPruningPlayer(5))
+        self.Players = (DummyPlayer(), AIPlayer(boardSize))
         self.game = Game(self.board, self.Players)
         self.proceedGame()
         self.makeBoardView()

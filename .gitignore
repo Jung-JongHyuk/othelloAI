@@ -23,3 +23,6 @@ train/__pycache__/othelloNetWrapper.cpython-38.pyc
 train/__pycache__/utils.cpython-38.pyc
 temp/temp.pth.tar
 temp/checkpoint_0.pth.tar.examples
+train/__pycache__/GameModel.cpython-38.pyc
+player/__pycache__/aiPlayer.cpython-38.pyc
+__pycache__/train.cpython-38.pyc

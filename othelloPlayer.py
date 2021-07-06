@@ -1,7 +1,9 @@
+import sys
+sys.path.append('./')
 from PyQt5.QtWidgets import QApplication
 from boardViewController import BoardViewController
 
 if __name__ == "__main__":
     app = QApplication([])
-    boardViewController = BoardViewController((8,8), 5)
+    boardViewController = BoardViewController((6,6), )
     app.exec_()

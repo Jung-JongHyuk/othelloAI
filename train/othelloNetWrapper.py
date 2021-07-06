@@ -4,10 +4,11 @@ import numpy as np
 import time
 import sys
 import os
+sys.path.append('../')
 from tqdm import tqdm
-from NeuralNet import NeuralNet
-from othelloNet import OthelloNet
-from utils import *
+from .NeuralNet import NeuralNet
+from .othelloNet import OthelloNet
+from .utils import *
 
 args = dotdict({
     'lr': 0.001,

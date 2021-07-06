@@ -120,11 +120,11 @@
 
 import sys
 import numpy as np
-from Game import Game
+from .GameModel import GameModel
 sys.path.append('../')
 from board import Board
 
-class OthelloGameWrapper(Game):
+class OthelloGameWrapper(GameModel):
     def __init__(self, boardSize, numOfBlock= 0):
         self.boardSize = (boardSize, boardSize)
         self.numOfBlock = numOfBlock
@@ -211,10 +211,11 @@ class OthelloGameWrapper(Game):
         return pos[0] * self.boardSize[0] + pos[1]
     
     def convertToPlayerIndexInBoardClass(self, player):
-        #(-1, 1) <=> (0, 1)
-        return 0 if player == -1 else 1
+        #1이 학습 모델의 인덱스이자 선공
+        #(-1, 1) <=> (1, 0)
+        return 0 if player == 1 else 1
     
     def convertToPlayerIndexInNumpy(self, player):
-        #(0, 1) <=> (-1, 1)
-        return -1 if player == 0 else 1
+        #(0, 1) <=> (1, -1)
+        return -1 if player == 1 else 1
 

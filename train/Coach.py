@@ -8,11 +8,14 @@ from random import shuffle
 import numpy as np
 from tqdm import tqdm
 
-from Arena import Arena
-from MCTS import MCTS
+from .Arena import Arena
+from .MCTS import MCTS
 
 log = logging.getLogger(__name__)
-
+consoleLogHandler = logging.StreamHandler()
+fileLogHandler = logging.FileHandler('./trainLog.log')
+log.addHandler(consoleLogHandler)
+log.addHandler(fileLogHandler)
 
 class Coach():
     """
