@@ -8,3 +8,18 @@ __pycache__/boardViewController.cpython-38.pyc
 player/__pycache__/humanPlayer.cpython-38.pyc
 player/__pycache__/alphaBetaPruningPlayer.cpython-38.pyc
 player/__pycache__/dummyPlayer.cpython-38.pyc
+paper/A general reinforcement learning algorithm that masters chess, shogi, and Go through self-play.pdf
+paper/Mastering Atari, Go, Chess and Shogi by Planning with a Learned Model.pdf
+paper/reinforcement learning in game review.pdf
+train/__pycache__/Arena.cpython-38.pyc
+train/__pycache__/board.cpython-38.pyc
+train/__pycache__/Coach.cpython-38.pyc
+train/__pycache__/Game.cpython-38.pyc
+train/__pycache__/MCTS.cpython-38.pyc
+train/__pycache__/NeuralNet.cpython-38.pyc
+train/__pycache__/othelloGameWrapper.cpython-38.pyc
+train/__pycache__/othelloNet.cpython-38.pyc
+train/__pycache__/othelloNetWrapper.cpython-38.pyc
+train/__pycache__/utils.cpython-38.pyc
+temp/temp.pth.tar
+temp/checkpoint_0.pth.tar.examples
