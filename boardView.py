@@ -1,3 +1,4 @@
+from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QGridLayout
 
 class BoardView(QWidget):
@@ -32,6 +33,20 @@ class BoardView(QWidget):
     def setGridText(self, pos, text):
         (row, col) = pos
         self.grids[row][col].setText(text)
+
+    def setGridIsPlaced(self, pos, isPlaced):
+        (row, col) = pos
+        if isPlaced == True:
+            self.grids[row][col].setStyleSheet("QPushButton {background-color: rgba(0,100,0,0.5); font-size: 75px; width: 50px; height: 50px}")
+        else:
+            self.grids[row][col].setStyleSheet("QPushButton {background-color: rgba(0,100,0,0.1); font-size: 50px; width: 50px; height: 50px}")
+
+    def setGridIsChanged(self, pos, isChanged):
+        (row, col) = pos
+        if isChanged == True:
+            self.grids[row][col].setStyleSheet("QPushButton {background-color: rgba(0,100,0,0.3); font-size: 50px; width: 50px; height: 50px}")
+        else:
+            self.grids[row][col].setStyleSheet("QPushButton {background-color: rgba(0,100,0,0.1); font-size: 50px; width: 50px; height: 50px}")
     
     def setGridClickEnabled(self, pos, clickEnabled):
         (row, col) = pos

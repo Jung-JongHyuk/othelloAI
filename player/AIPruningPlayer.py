@@ -1,9 +1,10 @@
-import torch
-import numpy as np
+from game import Game
+from player.alphaBetaPruningPlayer import AlphaBetaPruningPlayer
 from train.othelloNetWrapper import OthelloNetWrapper
 from train.utils import *
 from train.othelloGameWrapper import OthelloGameWrapper
-from player.playerInterface import PlayerInterface
+import numpy as np
+import torch
 
 args = dotdict({
     'lr': 0.001,
@@ -14,23 +15,15 @@ args = dotdict({
     'num_channels': 512,
 })
 
-class AIPlayer(PlayerInterface):
-    def __init__(self, boardSize, modelName='best.pth.tar'):
-        super().__init__()
+class AIPruningPlayer(AlphaBetaPruningPlayer):
+    def __init__(self, boardSize, modelName, seachDepth):
+        super().__init__(seachDepth)
         self.gameWrapper = OthelloGameWrapper(boardSize[0])
         self.agent = OthelloNetWrapper(self.gameWrapper)
         self.agent.load_checkpoint(folder='./temp', filename=modelName)
     
-    def decide(self, board):
-        boardData = np.array(board.board)
+    def getScore(self, currGame):
+        boardData = np.array(currGame.board.board)
         boardData = self.gameWrapper.getCanonicalForm(boardData, self.gameWrapper.convertToPlayerIndexInNumpy(self.playerIndex))
         (pi, v) = self.agent.predict(boardData)
-        pi = pi * self.gameWrapper.getValidMoves(boardData, self.gameWrapper.convertToPlayerIndexInNumpy(0))
-        print(pi)
-        print(v)
-        decision = np.argmax(pi)
-        return self.gameWrapper.actionToPos(decision)
-
-
-
-
+        return v

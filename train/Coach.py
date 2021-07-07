@@ -10,6 +10,10 @@ from tqdm import tqdm
 
 from .Arena import Arena
 from .MCTS import MCTS
+from game import Game
+from board import Board
+from player.randomPlayer import RandomPlayer
+from player.aiPlayer import AIPlayer
 
 log = logging.getLogger(__name__)
 consoleLogHandler = logging.StreamHandler()
@@ -122,6 +126,15 @@ class Coach():
             arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=0)),
                           lambda x: np.argmax(nmcts.getActionProb(x, temp=0)), self.game)
             pwins, nwins, draws = arena.playGames(self.args.arenaCompare)
+
+            self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='curr.pth.tar')
+            wins = [0,0]
+            for i in range(100):
+                game = Game(Board((6,6), 0), (RandomPlayer(), AIPlayer((6,6), 'curr.path.tar')))
+                winner = game.play(printBoard= False)
+                if winner != None:
+                    wins[winner] = wins[winner] + 1
+            print(wins)
 
             log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
             print('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))

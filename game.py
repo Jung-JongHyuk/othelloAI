@@ -54,14 +54,16 @@ class Game:
 if __name__ == "__main__":
     from player.randomPlayer import RandomPlayer
     from player.alphaBetaPruningPlayer import AlphaBetaPruningPlayer
+    from player.AIPruningPlayer import AIPruningPlayer
     from player.aiPlayer import AIPlayer
 
     # player0 = AlphaBetaPruningPlayer(5)
-    player0 = AIPlayer((6,6))
-    player1 = RandomPlayer()
+    player0 = AIPruningPlayer((6,6), modelName='checkpoint_42.pth.tar', seachDepth=3)
+    player1 = AIPruningPlayer((6,6), modelName='best.pth.tar', seachDepth=3)
+    # player1 = AIPlayer((6,6), modelName='checkpoint_41.pth.tar')
     wins = [0,0]
-    for i in range(10):
-        game = Game(Board((6,6), 0), (player0, player1))
+    for i in range(1):
+        game = Game(Board((6,6),0), (player0, player1))
         winner = game.play(printBoard= True)
         if winner != None:
             wins[winner] = wins[winner] + 1
