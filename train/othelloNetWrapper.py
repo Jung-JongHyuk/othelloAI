@@ -8,6 +8,8 @@ sys.path.append('../')
 from tqdm import tqdm
 from .NeuralNet import NeuralNet
 from .othello6x6VGGNet import Othello6x6VGGNet
+from .othelloFCNNet import OthelloFCNNet
+
 from .utils import *
 
 args = dotdict({
@@ -21,7 +23,7 @@ args = dotdict({
 
 class OthelloNetWrapper(NeuralNet):
     def __init__(self, game):
-        self.nnet = Othello6x6VGGNet(game, args)
+        self.nnet = OthelloFCNNet(game, args)
         self.boardSize = game.getBoardSize()
         self.actionSize = game.getActionSize()
         if args.cuda:
