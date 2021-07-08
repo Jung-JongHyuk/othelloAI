@@ -128,12 +128,12 @@ class Coach():
             log.info('PITTING AGAINST RANDOM AGENT')
             wins = [0,0] # 0: AI, 1: RANDOM
             for _ in tqdm(range(50), desc="Play with random(1)"):
-                game = Game(Board((6,6), 0), (AIPlayer((6,6), 'curr.path.tar'), RandomPlayer()))
+                game = Game(Board((6,6), 0), (AIPlayer((6,6), 'curr.pth.tar'), RandomPlayer()))
                 winner = game.play(printBoard= False)
                 if winner != None:
                     wins[winner] = wins[winner] + 1
             for _ in tqdm(range(50), desc="Play with random(2)"):
-                game = Game(Board((6,6), 0), (RandomPlayer(), AIPlayer((6,6), 'curr.path.tar')))
+                game = Game(Board((6,6), 0), (RandomPlayer(), AIPlayer((6,6), 'curr.pth.tar')))
                 winner = game.play(printBoard= False)
                 if winner != None:
                     wins[1 - winner] = wins[1 - winner] + 1

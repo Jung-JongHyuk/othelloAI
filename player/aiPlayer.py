@@ -26,8 +26,6 @@ class AIPlayer(PlayerInterface):
         boardData = self.gameWrapper.getCanonicalForm(boardData, self.gameWrapper.convertToPlayerIndexInNumpy(self.playerIndex))
         (pi, v) = self.agent.predict(boardData)
         pi = pi * self.gameWrapper.getValidMoves(boardData, self.gameWrapper.convertToPlayerIndexInNumpy(0))
-        print(pi)
-        print(v)
         decision = np.argmax(pi)
         return self.gameWrapper.actionToPos(decision)
 

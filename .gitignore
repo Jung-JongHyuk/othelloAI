@@ -27,3 +27,5 @@ __pycache__/train.cpython-38.pyc
 temp/
 player/__pycache__/AIPruningPlayer.cpython-38.pyc
 train/__pycache__/othello6x6VGGNet.cpython-38.pyc
+trainLog.log
+temp/best.pth.tar
