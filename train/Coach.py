@@ -125,18 +125,11 @@ class Coach():
             nmcts = MCTS(self.game, self.nnet, self.args)
 
             self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='curr.pth.tar')
-            log.info('PITTING AGAINST RANDOM AGENT')
-            wins = [0,0] # 0: AI, 1: RANDOM
-            for _ in tqdm(range(50), desc="Play with random(1)"):
-                game = Game(Board((6,6), 0), (AIPlayer((6,6), 'curr.pth.tar'), RandomPlayer()))
-                winner = game.play(printBoard= False)
-                if winner != None:
-                    wins[winner] = wins[winner] + 1
-            for _ in tqdm(range(50), desc="Play with random(2)"):
-                game = Game(Board((6,6), 0), (RandomPlayer(), AIPlayer((6,6), 'curr.pth.tar')))
-                winner = game.play(printBoard= False)
-                if winner != None:
-                    wins[1 - winner] = wins[1 - winner] + 1
+            log.info('PITTING AGAINST RANDOM AGENT IN TRAINED ENV')
+            wins = self.playWithRandomAgent((6,6), 100)
+            log.info('NEW/RANDOM WINS : %d / %d ; DRAWS : %d' % (wins[0], wins[1], 100 - wins[0] - wins[1]))
+            log.info('PITTING AGAINST RANDOM AGENT IN UNTRAINED ENV')
+            wins = self.playWithRandomAgent((8,8), 100)
             log.info('NEW/RANDOM WINS : %d / %d ; DRAWS : %d' % (wins[0], wins[1], 100 - wins[0] - wins[1]))
 
             log.info('PITTING AGAINST PREVIOUS VERSION')
@@ -145,16 +138,27 @@ class Coach():
             pwins, nwins, draws = arena.playGames(self.args.arenaCompare)
 
             log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
-            print('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
             if pwins + nwins == 0 or float(nwins) / (pwins + nwins) < self.args.updateThreshold:
                 log.info('REJECTING NEW MODEL')
-                print('REJECTING NEW MODEL')
                 self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
             else:
                 log.info('ACCEPTING NEW MODEL')
-                print('ACCEPTING NEW MODEL')
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
+    
+    def playWithRandomAgent(self, boardSize, iterCount):
+        wins = [0,0]
+        for _ in tqdm(range(int(iterCount / 2)), desc=f"Play with random(1), boardSize: {boardSize}"):
+            game = Game(Board(boardSize, 0), (AIPlayer(boardSize, 'curr.pth.tar'), RandomPlayer()))
+            winner = game.play(printBoard= False)
+            if winner != None:
+                wins[winner] = wins[winner] + 1
+        for _ in tqdm(range(int(iterCount / 2)), desc=f"Play with random(2), boardSize: {boardSize}"):
+            game = Game(Board(boardSize, 0), (RandomPlayer(), AIPlayer(boardSize, 'curr.pth.tar')))
+            winner = game.play(printBoard= False)
+            if winner != None:
+                wins[1 - winner] = wins[1 - winner] + 1
+        return wins
 
     def getCheckpointFile(self, iteration):
         return 'checkpoint_' + str(iteration) + '.pth.tar'

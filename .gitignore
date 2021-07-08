@@ -31,3 +31,7 @@ trainLog.log
 temp/best.pth.tar
 trainLog.log
 train/__pycache__/othelloFCNNet.cpython-38.pyc
+train/othelloFCNNet.py
+trainLog.log
+trainLogBefore.log
+temp/best.pth.tar
