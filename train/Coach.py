@@ -16,10 +16,14 @@ from player.randomPlayer import RandomPlayer
 from player.aiPlayer import AIPlayer
 
 log = logging.getLogger(__name__)
-consoleLogHandler = logging.StreamHandler()
-fileLogHandler = logging.FileHandler('./trainLog.log')
-log.addHandler(consoleLogHandler)
-log.addHandler(fileLogHandler)
+log.setLevel(logging.DEBUG)
+while log.hasHandlers():
+    log.removeHandler(logger.handlers[0])
+streamHandler = logging.StreamHandler()
+fileHandler = logging.FileHandler('trainLog.log', 'w')
+log.propagate = False
+log.addHandler(streamHandler)
+log.addHandler(fileHandler)
 
 class Coach():
     """
@@ -87,7 +91,6 @@ class Coach():
         for i in range(1, self.args.numIters + 1):
             # bookkeeping
             log.info(f'Starting Iter #{i} ...')
-            print(f'Starting Iter #{i} ...')
             # examples of the iteration
             if not self.skipFirstSelfPlay or i > 1:
                 iterationTrainExamples = deque([], maxlen=self.args.maxlenOfQueue)
@@ -121,20 +124,25 @@ class Coach():
             self.nnet.train(trainExamples)
             nmcts = MCTS(self.game, self.nnet, self.args)
 
-            log.info('PITTING AGAINST PREVIOUS VERSION')
-            print('PITTING AGAINST PREVIOUS VERSION')
-            arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=0)),
-                          lambda x: np.argmax(nmcts.getActionProb(x, temp=0)), self.game)
-            pwins, nwins, draws = arena.playGames(self.args.arenaCompare)
-
             self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='curr.pth.tar')
-            wins = [0,0]
-            for i in range(100):
-                game = Game(Board((6,6), 0), (RandomPlayer(), AIPlayer((6,6), 'curr.path.tar')))
+            log.info('PITTING AGAINST RANDOM AGENT')
+            wins = [0,0] # 0: AI, 1: RANDOM
+            for _ in tqdm(range(50), desc="Play with random(1)"):
+                game = Game(Board((6,6), 0), (AIPlayer((6,6), 'curr.path.tar'), RandomPlayer()))
                 winner = game.play(printBoard= False)
                 if winner != None:
                     wins[winner] = wins[winner] + 1
-            print(wins)
+            for _ in tqdm(range(50), desc="Play with random(2)"):
+                game = Game(Board((6,6), 0), (RandomPlayer(), AIPlayer((6,6), 'curr.path.tar')))
+                winner = game.play(printBoard= False)
+                if winner != None:
+                    wins[1 - winner] = wins[1 - winner] + 1
+            log.info('NEW/RANDOM WINS : %d / %d ; DRAWS : %d' % (wins[0], wins[1], 100 - wins[0] - wins[1]))
+
+            log.info('PITTING AGAINST PREVIOUS VERSION')
+            arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=0)),
+                          lambda x: np.argmax(nmcts.getActionProb(x, temp=0)), self.game)
+            pwins, nwins, draws = arena.playGames(self.args.arenaCompare)
 
             log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
             print('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
