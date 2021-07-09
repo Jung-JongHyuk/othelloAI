@@ -125,12 +125,10 @@ class Coach():
             nmcts = MCTS(self.game, self.nnet, self.args)
 
             self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='curr.pth.tar')
-            log.info('PITTING AGAINST RANDOM AGENT IN TRAINED ENV')
-            wins = self.playWithRandomAgent((6,6), 100)
-            log.info('NEW/RANDOM WINS : %d / %d ; DRAWS : %d' % (wins[0], wins[1], 100 - wins[0] - wins[1]))
-            log.info('PITTING AGAINST RANDOM AGENT IN UNTRAINED ENV')
-            wins = self.playWithRandomAgent((8,8), 100)
-            log.info('NEW/RANDOM WINS : %d / %d ; DRAWS : %d' % (wins[0], wins[1], 100 - wins[0] - wins[1]))
+            log.info('PITTING AGAINST RANDOM AGENT')
+            for boardSize in range([(6,6), (8,8), (10,10)]):
+                wins = self.playWithRandomAgent(boardSize, 100)
+                log.info(f'{boardSize} : NEW/RANDOM WINS : {wins[0]} / {wins[1]} ; DRAWS : {100 - wins[0] - wins[1]}')
 
             log.info('PITTING AGAINST PREVIOUS VERSION')
             arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=0)),

@@ -78,7 +78,7 @@ class OthelloNetWrapper(NeuralNet):
         # preparing input
         board = torch.FloatTensor(board.astype(np.float64))
         if args.cuda: board = board.contiguous().cuda()
-        board = board.view(1, self.boardSize[0], self.boardSize[1])
+        board = board.view(1, board.shape[0], board.shape[1])
         self.nnet.eval()
         with torch.no_grad():
             pi, v = self.nnet(board)
