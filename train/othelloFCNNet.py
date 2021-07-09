@@ -36,7 +36,7 @@ class OthelloFCNNet(nn.Module):
 
     def forward(self, s):
         #                                                           s: batch_size x board_x x board_y
-        s = s.view(-1, 1, self.board_x, self.board_y)                # batch_size x 1 x board_x x board_y
+        s = s.view(-1, 1, s.shape[1], s.shape[2])                # batch_size x 1 x board_x x board_y
         s = F.relu(self.convBn1(self.conv1(s)))                          # batch_size x num_channels / 2 x board_x x board_y
         s = F.relu(self.convBn2(self.conv2(s)))                          # batch_size x num_channels / 2 x board_x x board_y
         s = F.relu(self.convBn3(self.conv3(s)))                          # batch_size x num_channels x board_x x board_y

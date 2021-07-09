@@ -1,15 +1,23 @@
 import sys
 import numpy as np
+import random
 from .GameModel import GameModel
 sys.path.append('../')
 from board import Board
 
 class OthelloGameWrapper(GameModel):
     def __init__(self, boardSize, numOfBlock= 0):
-        self.boardSize = boardSize
+        if boardSize == None:
+            self.isBoardSizeRandom = True
+            self.boardSize = (0, 0)
+        else:
+            self.isBoardSizeRandom = False
+            self.boardSize = boardSize
         self.numOfBlock = numOfBlock
 
     def getInitBoard(self):
+        if self.isBoardSizeRandom:
+            self.boardSize = random.choice([(6,6), (8,8), (10,10)])
         board = Board(self.boardSize, self.numOfBlock)
         return np.array(board.board)
     
