@@ -25,6 +25,7 @@ train/__pycache__/GameModel.cpython-38.pyc
 player/__pycache__/aiPlayer.cpython-38.pyc
 __pycache__/train.cpython-38.pyc
 temp/
+paper/
 player/__pycache__/AIPruningPlayer.cpython-38.pyc
 train/__pycache__/othello6x6VGGNet.cpython-38.pyc
 trainLog.log

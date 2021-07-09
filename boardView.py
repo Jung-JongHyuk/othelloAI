@@ -37,7 +37,7 @@ class BoardView(QWidget):
     def setGridIsPlaced(self, pos, isPlaced):
         (row, col) = pos
         if isPlaced == True:
-            self.grids[row][col].setStyleSheet("QPushButton {background-color: rgba(0,100,0,0.5); font-size: 75px; width: 50px; height: 50px}")
+            self.grids[row][col].setStyleSheet("QPushButton {background-color: rgba(0,100,0,0.5); font-size: 50px; width: 50px; height: 50px}")
         else:
             self.grids[row][col].setStyleSheet("QPushButton {background-color: rgba(0,100,0,0.1); font-size: 50px; width: 50px; height: 50px}")
 

@@ -15,7 +15,7 @@ class BoardViewController:
         self.view = BoardView(boardSize)
         self.board = Board(boardSize, numOfBlank)
         self.prevBoard = copy.deepcopy(self.board)
-        self.Players = (AIPruningPlayer((6,6), modelName='checkpoint_42.pth.tar', seachDepth=3), DummyPlayer())
+        self.Players = (AIPruningPlayer(boardSize, modelName='best.pth.tar', seachDepth=2), DummyPlayer())
         self.game = Game(self.board, self.Players)
         self.lastPlacedPos = []
         self.proceedGame()

@@ -6,7 +6,7 @@ from board import Board
 
 class OthelloGameWrapper(GameModel):
     def __init__(self, boardSize, numOfBlock= 0):
-        self.boardSize = (boardSize, boardSize)
+        self.boardSize = boardSize
         self.numOfBlock = numOfBlock
 
     def getInitBoard(self):

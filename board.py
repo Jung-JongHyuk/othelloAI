@@ -107,18 +107,27 @@ class Board:
                     status[-1] = status[-1] + 1
         return status
 
-    def printBoard(self):
+    def printBoard(self, printLabel= False):
         printLiterals = ["O", "#", " ", "*"]
-        print("  ", end = "")
-        for i in range(self.colSize):
-            print(i, end = " ")
+        for i in range(self.colSize * 2):
+            print("-", end= "")
         print("")
+
+        if printLabel == True:
+            print("  ", end = "")
+            for i in range(self.colSize):
+                print(i, end = " ")
+            print("")
         for rowIndex in range(self.rowSize):
             for colIndex in range(self.colSize):
-                if colIndex == 0:
+                if colIndex == 0 and printLabel == True:
                     print(rowIndex, end = " ")
                 print(printLiterals[self.board[rowIndex][colIndex]], end = " ")
             print("")
+        
+        for i in range(self.colSize * 2):
+            print("-", end= "")
+        print("")
 
 if __name__ == "__main__":
     board = Board((8,8),5)

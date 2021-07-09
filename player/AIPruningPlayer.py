@@ -18,7 +18,7 @@ args = dotdict({
 class AIPruningPlayer(AlphaBetaPruningPlayer):
     def __init__(self, boardSize, modelName, seachDepth):
         super().__init__(seachDepth)
-        self.gameWrapper = OthelloGameWrapper(boardSize[0])
+        self.gameWrapper = OthelloGameWrapper(boardSize)
         self.agent = OthelloNetWrapper(self.gameWrapper)
         self.agent.load_checkpoint(folder='./temp', filename=modelName)
     
