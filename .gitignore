@@ -36,3 +36,4 @@ train/othelloFCNNet.py
 trainLog.log
 trainLogBefore.log
 temp/best.pth.tar
+trainLog/
