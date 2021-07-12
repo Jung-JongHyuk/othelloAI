@@ -6,18 +6,26 @@ sys.path.append('../')
 from board import Board
 
 class OthelloGameWrapper(GameModel):
-    def __init__(self, boardSize, numOfBlock= 0):
+    def __init__(self, boardSize, numOfBlock):
         if boardSize == None:
             self.isBoardSizeRandom = True
             self.boardSize = (0, 0)
         else:
             self.isBoardSizeRandom = False
             self.boardSize = boardSize
-        self.numOfBlock = numOfBlock
+        
+        if numOfBlock == None:
+            self.isNumOfBlockRandom = True
+            self.numOfBlock = 0
+        else:
+            self.isNumOfBlockRandom = True
+            self.numOfBlock = numOfBlock
 
     def getInitBoard(self):
         if self.isBoardSizeRandom:
             self.boardSize = random.choice([(6,6), (8,8), (10,10)])
+        if self.isNumOfBlockRandom:
+            self.numOfBlock = random.choice([0, 1, 2, 3, 4, 5])
         board = Board(self.boardSize, self.numOfBlock)
         return np.array(board.board)
     
@@ -65,9 +73,9 @@ class OthelloGameWrapper(GameModel):
             return board.copy()
         else:
             result = board.copy()
-            result = np.where(result == 0, 99, result)
+            result = np.where(result == 0, None, result)
             result = np.where(result == 1, 0, result)
-            result = np.where(result == 99, 1, result)
+            result = np.where(result == None, 1, result)
             return result
     
     def getSymmetries(self, board, pi):
@@ -92,8 +100,11 @@ class OthelloGameWrapper(GameModel):
         return result
 
     def actionToPos(self, action):
-        colSize = self.boardSize[1]
-        return (int(action / colSize), action % colSize)
+        if action == self.boardSize[0] * self.boardSize[1]:
+            return None
+        else:
+            colSize = self.boardSize[1]
+            return (int(action / colSize), action % colSize)
     
     def posToAction(self, pos):
         return pos[0] * self.boardSize[0] + pos[1]

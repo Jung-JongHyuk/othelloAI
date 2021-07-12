@@ -22,12 +22,15 @@ class AIPlayer(PlayerInterface):
         self.agent.load_checkpoint(folder='./temp', filename=modelName)
     
     def decide(self, board):
-        boardData = np.array(board.board)
-        boardData = self.gameWrapper.getCanonicalForm(boardData, self.gameWrapper.convertToPlayerIndexInNumpy(self.playerIndex))
-        (pi, v) = self.agent.predict(boardData)
-        pi = pi * self.gameWrapper.getValidMoves(boardData, self.gameWrapper.convertToPlayerIndexInNumpy(0))
-        decision = np.argmax(pi)
-        return self.gameWrapper.actionToPos(decision)
+        if len(board.getPlaceableCoordinates(self.playerIndex)) == 0:
+            return None
+        else:
+            boardData = np.array(board.board)
+            boardData = self.gameWrapper.getCanonicalForm(boardData, self.gameWrapper.convertToPlayerIndexInNumpy(self.playerIndex))
+            (pi, v) = self.agent.predict(boardData)
+            pi = pi * self.gameWrapper.getValidMoves(boardData, self.gameWrapper.convertToPlayerIndexInNumpy(0))
+            decision = np.argmax(pi)
+            return self.gameWrapper.actionToPos(decision)
 
 
 

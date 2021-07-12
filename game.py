@@ -57,12 +57,12 @@ if __name__ == "__main__":
     from player.AIPruningPlayer import AIPruningPlayer
     from player.aiPlayer import AIPlayer
 
-    boardSize = (8,8)
+    boardSize = (10,10)
 
     # player0 = AlphaBetaPruningPlayer(5)
     player0 = RandomPlayer()
     # player1 = AIPruningPlayer((6,6), modelName='best.pth.tar', seachDepth=3)
-    player1 = AIPlayer(boardSize, modelName='best.pth.tar')
+    player1 = AIPlayer(boardSize, modelName='curr.pth.tar')
     wins = [0,0]
     for i in range(100):
         game = Game(Board(boardSize,0), (player0, player1))

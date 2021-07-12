@@ -31,7 +31,7 @@ args = dotdict({
 
 def main():
     log.info('Loading %s...', OthelloGameWrapper.__name__)
-    game = OthelloGameWrapper((6,6))
+    game = OthelloGameWrapper(boardSize= None, numOfBlock= None)
     log.info('Loading %s...', OthelloNetWrapper.__name__)
     model = OthelloNetWrapper(game)
 
