@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 # coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.
 
 args = dotdict({
-    'numIters': 100,
+    'numIters': 2,
     'numEps': 100,              # Number of complete self-play games to simulate during a new iteration.
     'tempThreshold': 15,        #
     'updateThreshold': 0.6,     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
@@ -30,27 +30,33 @@ args = dotdict({
 
 
 def main():
-    log.info('Loading %s...', OthelloGameWrapper.__name__)
-    game = OthelloGameWrapper(boardSize= None, numOfBlock= None)
-    log.info('Loading %s...', OthelloNetWrapper.__name__)
+    # log.info('Loading %s...', OthelloGameWrapper.__name__)
+    # game = OthelloGameWrapper(boardSize= None, numOfBlock= None)
+    # log.info('Loading %s...', OthelloNetWrapper.__name__)
+    # model = OthelloNetWrapper(game)
+
+    # if args.load_model:
+    #     log.info('Loading checkpoint "%s/%s"...', args.load_folder_file)
+    #     model.load_checkpoint(args.load_folder_file[0], args.load_folder_file[1])
+    # else:
+    #     log.warning('Not loading a checkpoint!')
+
+    # log.info('Loading the Coach...')
+    # coach = Coach(game, model, args)
+
+    # if args.load_model:
+    #     log.info("Loading 'trainExamples' from file...")
+    #     c.loadTrainExamples()
+
+    # log.info('Starting the learning process 🎉')
+    # coach.learn()
+
+    game = OthelloGameWrapper(boardSize= (6,6), numOfBlock= 0)
     model = OthelloNetWrapper(game)
-
-    if args.load_model:
-        log.info('Loading checkpoint "%s/%s"...', args.load_folder_file)
-        model.load_checkpoint(args.load_folder_file[0], args.load_folder_file[1])
-    else:
-        log.warning('Not loading a checkpoint!')
-
-    log.info('Loading the Coach...')
-    coach = Coach(game, model, args)
-
-    if args.load_model:
-        log.info("Loading 'trainExamples' from file...")
-        c.loadTrainExamples()
-
-    log.info('Starting the learning process 🎉')
-    coach.learn()
-
+    for boardSize in [(6,6), (8,8), (10,10)]:
+        game = OthelloGameWrapper(boardSize= boardSize, numOfBlock= 0)
+        coach = Coach(game, model, args)
+        coach.learn()
 
 if __name__ == "__main__":
     main()

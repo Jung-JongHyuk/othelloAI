@@ -6,7 +6,7 @@ sys.path.append('../')
 from board import Board
 
 class OthelloGameWrapper(GameModel):
-    def __init__(self, boardSize, numOfBlock):
+    def __init__(self, boardSize, numOfBlock= 0):
         if boardSize == None:
             self.isBoardSizeRandom = True
             self.boardSize = (0, 0)
