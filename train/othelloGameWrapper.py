@@ -18,7 +18,7 @@ class OthelloGameWrapper(GameModel):
             self.isNumOfBlockRandom = True
             self.numOfBlock = 0
         else:
-            self.isNumOfBlockRandom = True
+            self.isNumOfBlockRandom = False
             self.numOfBlock = numOfBlock
 
     def getInitBoard(self):
