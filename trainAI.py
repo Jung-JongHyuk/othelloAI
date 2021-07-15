@@ -54,7 +54,7 @@ def main():
 
     game = OthelloGameWrapper(boardSize= (6,6), numOfBlock= 0)
     model = QNetWrapper(game)
-    for boardSize in [(6,6), (8,8), (10,10)]:
+    for boardSize in [(6,6)]:
         game = OthelloGameWrapper(boardSize= boardSize, numOfBlock= 0)
         coach = Coach(game, model, args)
         coach.learn()

@@ -126,7 +126,7 @@ class Coach():
 
             self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='curr.pth.tar')
             log.info('PITTING AGAINST RANDOM AGENT')
-            for boardSize in [(6,6), (8,8), (10,10)]:
+            for boardSize in [(6,6)]:
                 wins = self.playWithRandomAgent(boardSize, 100)
                 log.info(f'{boardSize} : NEW/RANDOM WINS : {wins[0]} / {wins[1]} ; DRAWS : {100 - wins[0] - wins[1]}')
 
