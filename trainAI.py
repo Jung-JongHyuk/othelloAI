@@ -1,4 +1,5 @@
 import logging
+import math
 from pickle import Pickler, Unpickler
 # import coloredlogs
 
@@ -14,7 +15,7 @@ log = logging.getLogger(__name__)
 # coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.
 
 args = dotdict({
-    'numIters': 2,
+    'numIters': 50,
     'numEps': 100,              # Number of complete self-play games to simulate during a new iteration.
     'tempThreshold': 15,        #
     'updateThreshold': 0.6,     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
@@ -55,16 +56,25 @@ def main():
 
     game = OthelloGameWrapper(boardSize= (6,6), numOfBlock= 0)
     model = QNetWrapper(game)
-    for (task, boardSize) in enumerate([(6,6), (8,8), (10,10)]):
+    for (task, boardSize) in enumerate([(6,6), (6,6), (6,6)]):
         game = OthelloGameWrapper(boardSize= boardSize, numOfBlock= 0)
         coach = Coach(game, model, args)
         coach.learn()
         trainExamples = []
-        with open(f'./temp/checkpoint_{args.numIters}.pth.tar.examples', "rb") as f:
+        with open(f'./temp/checkpoint_{args.numIters - 1}.pth.tar.examples', "rb") as f:
             trainExamplesHistory = Unpickler(f).load()
             for e in trainExamplesHistory:
                 trainExamples.extend(e)
         estimate_fisher(task, 'cuda:0', model, trainExamples)
+        for m in model.nnet.modules():
+            if isinstance(m, Linear_Q) or isinstance(m, Conv2d_Q):
+                # update bits according to information gain
+                m.update_bits(task=task, C=0.5/math.log(2))
+                # do quantization
+                m.sync_weight()
+                # update Fisher in the buffer
+                m.update_fisher(task=task)
+        Coach.log.info(f'used capacity: {used_capacity(model.nnet, 20)}')
 
 if __name__ == "__main__":
     main()

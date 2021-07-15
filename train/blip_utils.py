@@ -1,5 +1,5 @@
 import numpy as np
-import tqdm
+from tqdm import tqdm
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -128,19 +128,18 @@ def estimate_fisher(task, device, model, examples, batch_size=100, num_batch=80,
     pi_losses = AverageMeter()
     v_losses = AverageMeter()
 
-    batch_count = int(len(examples) / model.args.batch_size)
+    batch_count = int(len(examples) / model.nnet.args.batch_size)
 
-    optimizer = optim.Adam(model.nnet.parameters())
-    t = tqdm(range(batch_count), desc='updating fisher')
+    t = tqdm(range(batch_count), desc='estimating fisher')
     for _ in t:
-        sample_ids = np.random.randint(len(examples), size=args.batch_size)
+        sample_ids = np.random.randint(len(examples), size=model.nnet.args.batch_size)
         boards, pis, vs = list(zip(*[examples[i] for i in sample_ids]))
         boards = torch.FloatTensor(np.array(boards).astype(np.float64))
         target_pis = torch.FloatTensor(np.array(pis))
         target_vs = torch.FloatTensor(np.array(vs).astype(np.float64))
 
         # predict
-        if model.args.cuda:
+        if model.nnet.args.cuda:
             boards, target_pis, target_vs = boards.contiguous().cuda(), target_pis.contiguous().cuda(), target_vs.contiguous().cuda()
 
         # compute output
@@ -155,12 +154,12 @@ def estimate_fisher(task, device, model, examples, batch_size=100, num_batch=80,
         t.set_postfix(Loss_pi=pi_losses, Loss_v=v_losses)
 
         # compute gradient and do SGD step
-        optimizer.zero_grad()
+        model.nnet.zero_grad()
         total_loss.backward()
         update_Fisher(model.nnet)
-        total_loss.zero_grad()
+        model.nnet.zero_grad()
     
-    total_data = num_round*batch_size*num_batch
+    total_data = len(examples)
     for m in model.nnet.modules():
         if isinstance(m, Linear_Q) or isinstance(m, Conv2d_Q):
             m.Fisher_w /= total_data
@@ -168,3 +167,17 @@ def estimate_fisher(task, device, model, examples, batch_size=100, num_batch=80,
                 m.Fisher_b /= total_data
             m.handle_forward.remove()
             m.handle_backward.remove()
+
+# BLIP specific function
+# check how many bits (capacity) has been used
+def used_capacity(model, max_bit):
+    used_bits = 0
+    total_bits = 0
+    for m in model.modules():
+        if isinstance(m, Linear_Q) or isinstance(m, Conv2d_Q):
+            used_bits += m.bit_alloc_w.sum().item()
+            total_bits += max_bit*m.weight.numel()
+            if m.bias is not None:
+                used_bits += m.bit_alloc_b.sum().item()
+                total_bits += max_bit*m.bias.numel()
+    return float(used_bits)/float(total_bits)
