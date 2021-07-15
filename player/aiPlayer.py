@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-from train.othelloNetWrapper import OthelloNetWrapper
+from train.network.othelloNetWrapper import OthelloNetWrapper
 from train.utils import *
 from train.othelloGameWrapper import OthelloGameWrapper
 from player.playerInterface import PlayerInterface

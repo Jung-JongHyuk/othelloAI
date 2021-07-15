@@ -1,35 +1,7 @@
 .vscode/settings.json
-__pycache__/board.cpython-38.pyc
-player/__pycache__/playerInterface.cpython-38.pyc
-player/__pycache__/randomPlayer.cpython-38.pyc
-__pycache__/game.cpython-38.pyc
-__pycache__/boardView.cpython-38.pyc
-__pycache__/boardViewController.cpython-38.pyc
-player/__pycache__/humanPlayer.cpython-38.pyc
-player/__pycache__/alphaBetaPruningPlayer.cpython-38.pyc
-player/__pycache__/dummyPlayer.cpython-38.pyc
-paper/A general reinforcement learning algorithm that masters chess, shogi, and Go through self-play.pdf
-paper/Mastering Atari, Go, Chess and Shogi by Planning with a Learned Model.pdf
-paper/reinforcement learning in game review.pdf
-train/__pycache__/Arena.cpython-38.pyc
-train/__pycache__/board.cpython-38.pyc
-train/__pycache__/Coach.cpython-38.pyc
-train/__pycache__/Game.cpython-38.pyc
-train/__pycache__/MCTS.cpython-38.pyc
-train/__pycache__/NeuralNet.cpython-38.pyc
-train/__pycache__/othelloGameWrapper.cpython-38.pyc
-train/__pycache__/othelloNet.cpython-38.pyc
-train/__pycache__/othelloNetWrapper.cpython-38.pyc
-train/__pycache__/utils.cpython-38.pyc
-train/__pycache__/GameModel.cpython-38.pyc
-player/__pycache__/aiPlayer.cpython-38.pyc
-__pycache__/train.cpython-38.pyc
 temp/
 paper/
-player/__pycache__/AIPruningPlayer.cpython-38.pyc
-train/__pycache__/othello6x6VGGNet.cpython-38.pyc
 trainLog.log
-train/__pycache__/othelloFCNNet.cpython-38.pyc
-train/othelloFCNNet.py
 trainLogBefore.log
 trainLog/
+*.pyc

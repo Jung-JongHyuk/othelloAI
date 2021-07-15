@@ -4,7 +4,7 @@ import logging
 
 from train.Coach import Coach
 from train.othelloGameWrapper import OthelloGameWrapper
-from train.othelloNetWrapper import OthelloNetWrapper
+from train.network.othelloNetWrapper import OthelloNetWrapper
 from train.utils import *
 
 log = logging.getLogger(__name__)

@@ -1,6 +1,6 @@
 from game import Game
 from player.alphaBetaPruningPlayer import AlphaBetaPruningPlayer
-from train.othelloNetWrapper import OthelloNetWrapper
+from train.network.othelloNetWrapper import OthelloNetWrapper
 from train.utils import *
 from train.othelloGameWrapper import OthelloGameWrapper
 import numpy as np
