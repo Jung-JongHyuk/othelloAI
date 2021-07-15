@@ -5,6 +5,7 @@ import logging
 from train.Coach import Coach
 from train.othelloGameWrapper import OthelloGameWrapper
 from train.network.othelloNetWrapper import OthelloNetWrapper
+from train.network.QNetWrapper import QNetWrapper
 from train.utils import *
 
 log = logging.getLogger(__name__)
@@ -52,7 +53,7 @@ def main():
     # coach.learn()
 
     game = OthelloGameWrapper(boardSize= (6,6), numOfBlock= 0)
-    model = OthelloNetWrapper(game)
+    model = QNetWrapper(game)
     for boardSize in [(6,6), (8,8), (10,10)]:
         game = OthelloGameWrapper(boardSize= boardSize, numOfBlock= 0)
         coach = Coach(game, model, args)
