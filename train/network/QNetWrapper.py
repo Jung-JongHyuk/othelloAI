@@ -7,6 +7,7 @@ import os
 from tqdm import tqdm
 from .NeuralNet import NeuralNet
 from .QVGGNet import QVGGNet
+from .quantizedLayer import Linear_Q, Conv2d_Q
 sys.path.append('../')
 from train.utils import *
 
@@ -68,6 +69,10 @@ class QNetWrapper(NeuralNet):
                 optimizer.zero_grad()
                 total_loss.backward()
                 optimizer.step()
+
+                for m in self.nnet.modules():
+                    if isinstance(m, Linear_Q) or isinstance(m, Conv2d_Q):
+                        m.clipping()
 
     def predict(self, board):
         """

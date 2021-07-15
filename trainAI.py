@@ -1,5 +1,5 @@
 import logging
-
+from pickle import Pickler, Unpickler
 # import coloredlogs
 
 from train.Coach import Coach
@@ -7,6 +7,7 @@ from train.othelloGameWrapper import OthelloGameWrapper
 from train.network.othelloNetWrapper import OthelloNetWrapper
 from train.network.QNetWrapper import QNetWrapper
 from train.utils import *
+from train.blip_utils import *
 
 log = logging.getLogger(__name__)
 
@@ -54,10 +55,16 @@ def main():
 
     game = OthelloGameWrapper(boardSize= (6,6), numOfBlock= 0)
     model = QNetWrapper(game)
-    for boardSize in [(6,6)]:
+    for (task, boardSize) in enumerate([(6,6), (8,8), (10,10)]):
         game = OthelloGameWrapper(boardSize= boardSize, numOfBlock= 0)
         coach = Coach(game, model, args)
         coach.learn()
+        trainExamples = []
+        with open(f'./temp/checkpoint_{args.numIters}.pth.tar.examples', "rb") as f:
+            trainExamplesHistory = Unpickler(f).load()
+            for e in trainExamplesHistory:
+                trainExamples.extend(e)
+        estimate_fisher(task, 'cuda:0', model, trainExamples)
 
 if __name__ == "__main__":
     main()
