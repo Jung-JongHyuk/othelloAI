@@ -7,6 +7,7 @@ import os
 from tqdm import tqdm
 from .NeuralNet import NeuralNet
 from .QVGGNet import QVGGNet
+from .QFCNNet import QFCNNet
 from .quantizedLayer import Linear_Q, Conv2d_Q
 sys.path.append('../')
 from train.utils import *
@@ -22,7 +23,7 @@ args = dotdict({
 
 class QNetWrapper(NeuralNet):
     def __init__(self, game):
-        self.nnet = QVGGNet(game, args)
+        self.nnet = QFCNNet(game, args)
         self.boardSize = game.getBoardSize()
         self.actionSize = game.getActionSize()
         if args.cuda:
