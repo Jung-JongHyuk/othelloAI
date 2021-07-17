@@ -56,20 +56,22 @@ if __name__ == "__main__":
     from player.alphaBetaPruningPlayer import AlphaBetaPruningPlayer
     from player.AIPruningPlayer import AIPruningPlayer
     from player.aiPlayer import AIPlayer
+    from player.dummyPlayer import DummyPlayer
 
-    boardSize = (10,10)
+    boardSize = (14,14)
 
-    # player0 = AlphaBetaPruningPlayer(5)
     player0 = RandomPlayer()
+    # player0 = RandomPlayer()
     # player1 = AIPruningPlayer((6,6), modelName='best.pth.tar', seachDepth=3)
-    player1 = AIPlayer(boardSize, modelName='curr.pth.tar')
+    player1 = AIPlayer(boardSize, modelName='best.pth.tar')
     wins = [0,0]
-    for i in range(100):
+    for i in range(10):
         game = Game(Board(boardSize,0), (player0, player1))
         winner = game.play(printBoard= False)
         if winner != None:
             wins[winner] = wins[winner] + 1
         print(wins)
+
             
 
 

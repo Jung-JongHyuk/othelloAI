@@ -19,8 +19,8 @@ class AIPlayer(PlayerInterface):
     def __init__(self, boardSize, modelName='best.pth.tar'):
         super().__init__()
         self.gameWrapper = OthelloGameWrapper(boardSize)
-        # self.agent = OthelloNetWrapper(self.gameWrapper)
-        self.agent = QNetWrapper(self.gameWrapper)
+        self.agent = OthelloNetWrapper(self.gameWrapper)
+        # self.agent = QNetWrapper(self.gameWrapper)
         self.agent.load_checkpoint(folder='./temp', filename=modelName)
     
     def decide(self, board):
@@ -30,8 +30,12 @@ class AIPlayer(PlayerInterface):
             boardData = np.array(board.board)
             boardData = self.gameWrapper.getCanonicalForm(boardData, self.gameWrapper.convertToPlayerIndexInNumpy(self.playerIndex))
             (pi, v) = self.agent.predict(boardData)
-            pi = pi * self.gameWrapper.getValidMoves(boardData, self.gameWrapper.convertToPlayerIndexInNumpy(0))
+            validMoves = self.gameWrapper.getValidMoves(boardData, self.gameWrapper.convertToPlayerIndexInNumpy(0))
+            pi = pi * validMoves
             decision = np.argmax(pi)
+            if validMoves[decision] == 0:
+                validMoveIndexs = np.argwhere(validMoves == 1).reshape((-1,))
+                decision = np.random.choice(validMoveIndexs)
             return self.gameWrapper.actionToPos(decision)
 
 
