@@ -18,7 +18,7 @@ from player.aiPlayer import AIPlayer
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 while log.hasHandlers():
-    log.removeHandler(logger.handlers[0])
+    log.removeHandler(log.handlers[0])
 streamHandler = logging.StreamHandler()
 fileHandler = logging.FileHandler('trainLog.log', 'w')
 log.propagate = False
@@ -126,8 +126,8 @@ class Coach():
 
             self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='curr.pth.tar')
             log.info('PITTING AGAINST RANDOM AGENT')
-            for boardSize in [(6,6), (8,8), (10,10)]:
-                wins = self.playWithRandomAgent(boardSize, 100)
+            for (boardSize, numOfBlock) in [((4,4), 0), ((6,6), 0), ((6,6), 3), ((8,8), 0), ((8,8), 5)]:
+                wins = self.playWithRandomAgent(boardSize, numOfBlock, 100)
                 log.info(f'{boardSize} : NEW/RANDOM WINS : {wins[0]} / {wins[1]} ; DRAWS : {100 - wins[0] - wins[1]}')
 
             log.info('PITTING AGAINST PREVIOUS VERSION')
@@ -144,15 +144,15 @@ class Coach():
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
     
-    def playWithRandomAgent(self, boardSize, iterCount):
+    def playWithRandomAgent(self, boardSize, numOfBlock, iterCount):
         wins = [0,0]
         for _ in tqdm(range(int(iterCount / 2)), desc=f"Play with random(1), boardSize: {boardSize}"):
-            game = Game(Board(boardSize, 0), (AIPlayer(boardSize, 'curr.pth.tar'), RandomPlayer()))
+            game = Game(Board(boardSize, numOfBlock), (AIPlayer(boardSize, 'curr.pth.tar'), RandomPlayer()))
             winner = game.play(printBoard= False)
             if winner != None:
                 wins[winner] = wins[winner] + 1
         for _ in tqdm(range(int(iterCount / 2)), desc=f"Play with random(2), boardSize: {boardSize}"):
-            game = Game(Board(boardSize, 0), (RandomPlayer(), AIPlayer(boardSize, 'curr.pth.tar')))
+            game = Game(Board(boardSize, numOfBlock), (RandomPlayer(), AIPlayer(boardSize, 'curr.pth.tar')))
             winner = game.play(printBoard= False)
             if winner != None:
                 wins[1 - winner] = wins[1 - winner] + 1

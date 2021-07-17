@@ -11,11 +11,17 @@ from train.utils import *
 from train.blip_utils import *
 
 log = logging.getLogger(__name__)
-
-# coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.
+log.setLevel(logging.DEBUG)
+while log.hasHandlers():
+    log.removeHandler(log.handlers[0])
+streamHandler = logging.StreamHandler()
+fileHandler = logging.FileHandler('trainLog.log', 'w')
+log.propagate = False
+log.addHandler(streamHandler)
+log.addHandler(fileHandler)
 
 args = dotdict({
-    'numIters': 50,
+    'numIters': 20,
     'numEps': 100,              # Number of complete self-play games to simulate during a new iteration.
     'tempThreshold': 15,        #
     'updateThreshold': 0.6,     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
@@ -54,11 +60,17 @@ def main():
     # log.info('Starting the learning process 🎉')
     # coach.learn()
 
+    import gc
+
+    gc.collect()
+
+    torch.cuda.empty_cache()
+
     game = OthelloGameWrapper(boardSize= (6,6), numOfBlock= 0)
-    model = QNetWrapper(game)
-    for (task, boardSize) in enumerate([(6,6), (8,8), (10,10)]):
-        Coach.log.info(f'task f{task}: {boardSize}')
-        game = OthelloGameWrapper(boardSize= boardSize, numOfBlock= 0)
+    model = OthelloNetWrapper(game)
+    for (task, (boardSize, numOfBlock)) in enumerate([((6,6), 0), ((6,6), 3), ((8,8), 0), ((8,8), 5)]):
+        log.info(f'task {task}: {boardSize}, {numOfBlock}')
+        game = OthelloGameWrapper(boardSize= boardSize, numOfBlock= numOfBlock)
         coach = Coach(game, model, args)
         coach.learn()
         trainExamples = []
@@ -75,7 +87,7 @@ def main():
                 m.sync_weight()
                 # update Fisher in the buffer
                 m.update_fisher(task=task)
-        Coach.log.info(f'used capacity: {used_capacity(model.nnet, 20)}')
+        log.info(f'used capacity: {used_capacity(model.nnet, 20)}')
 
 if __name__ == "__main__":
     main()
