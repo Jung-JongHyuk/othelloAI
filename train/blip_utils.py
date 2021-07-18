@@ -130,9 +130,9 @@ def estimate_fisher(task, device, model, examples, batch_size=100, num_batch=80,
 
     batch_count = int(len(examples) / model.nnet.args.batch_size)
 
-    t = tqdm(range(batch_count), desc='estimating fisher')
+    t = tqdm(range(num_batch), desc='estimating fisher')
     for _ in t:
-        sample_ids = np.random.randint(len(examples), size=model.nnet.args.batch_size)
+        sample_ids = np.random.randint(len(examples), size=batch_size)
         boards, pis, vs = list(zip(*[examples[i] for i in sample_ids]))
         boards = torch.FloatTensor(np.array(boards).astype(np.float64))
         target_pis = torch.FloatTensor(np.array(pis))
@@ -159,7 +159,7 @@ def estimate_fisher(task, device, model, examples, batch_size=100, num_batch=80,
         update_Fisher(model.nnet)
         model.nnet.zero_grad()
     
-    total_data = len(examples)
+    total_data = batch_size*num_batch
     for m in model.nnet.modules():
         if isinstance(m, Linear_Q) or isinstance(m, Conv2d_Q):
             m.Fisher_w /= total_data
@@ -175,6 +175,9 @@ def used_capacity(model, max_bit):
     total_bits = 0
     for m in model.modules():
         if isinstance(m, Linear_Q) or isinstance(m, Conv2d_Q):
+            (hist, bins) = np.histogram(m.bit_alloc_w.cpu().numpy().reshape((-1,)), np.arange(0,21,1))
+            print(m._get_name())
+            print(hist)
             used_bits += m.bit_alloc_w.sum().item()
             total_bits += max_bit*m.weight.numel()
             if m.bias is not None:
