@@ -66,11 +66,12 @@ def main():
 
     torch.cuda.empty_cache()
 
-    game = OthelloGameWrapper(boardSize= (6,6), numOfBlock= 0)
-    model = QNetWrapper(game)
-    for (task, (boardSize, numOfBlock)) in enumerate([((8,8), 5), ((6,6), 0)]):
-        log.info(f'task {task}: {boardSize}, {numOfBlock}')
-        game = OthelloGameWrapper(boardSize= boardSize, numOfBlock= numOfBlock)
+    game = OthelloGameWrapper(boardSize= (6,6))
+    model = OthelloNetWrapper(game)
+    
+    for (task, (boardSize, blockPosType)) in enumerate([((6,6), 0), ((8,8), 1), ((8,8), 2)]):
+        log.info(f'task {task}: {boardSize}, {blockPosType}')
+        game = OthelloGameWrapper(boardSize= boardSize, blockPosType= blockPosType)
         coach = Coach(game, model, args)
         coach.learn()
         if isinstance(model, QNetWrapper):
