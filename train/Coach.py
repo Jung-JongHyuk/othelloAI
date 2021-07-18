@@ -128,7 +128,7 @@ class Coach():
             log.info('PITTING AGAINST RANDOM AGENT')
             for (boardSize, numOfBlock) in [((4,4), 0), ((6,6), 0), ((6,6), 3), ((8,8), 0), ((8,8), 5)]:
                 wins = self.playWithRandomAgent(boardSize, numOfBlock, 100)
-                log.info(f'{boardSize} : NEW/RANDOM WINS : {wins[0]} / {wins[1]} ; DRAWS : {100 - wins[0] - wins[1]}')
+                log.info(f'{boardSize}, {numOfBlock} : NEW/RANDOM WINS : {wins[0]} / {wins[1]} ; DRAWS : {100 - wins[0] - wins[1]}')
 
             log.info('PITTING AGAINST PREVIOUS VERSION')
             arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=0)),

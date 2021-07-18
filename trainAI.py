@@ -67,27 +67,28 @@ def main():
     torch.cuda.empty_cache()
 
     game = OthelloGameWrapper(boardSize= (6,6), numOfBlock= 0)
-    model = OthelloNetWrapper(game)
-    for (task, (boardSize, numOfBlock)) in enumerate([((6,6), 0), ((6,6), 3), ((8,8), 0), ((8,8), 5)]):
+    model = QNetWrapper(game)
+    for (task, (boardSize, numOfBlock)) in enumerate([((8,8), 5), ((6,6), 0)]):
         log.info(f'task {task}: {boardSize}, {numOfBlock}')
         game = OthelloGameWrapper(boardSize= boardSize, numOfBlock= numOfBlock)
         coach = Coach(game, model, args)
         coach.learn()
-        trainExamples = []
-        with open(f'./temp/checkpoint_{args.numIters - 1}.pth.tar.examples', "rb") as f:
-            trainExamplesHistory = Unpickler(f).load()
-            for e in trainExamplesHistory:
-                trainExamples.extend(e)
-        estimate_fisher(task, 'cuda:0', model, trainExamples)
-        for m in model.nnet.modules():
-            if isinstance(m, Linear_Q) or isinstance(m, Conv2d_Q):
-                # update bits according to information gain
-                m.update_bits(task=task, C=0.5/math.log(2))
-                # do quantization
-                m.sync_weight()
-                # update Fisher in the buffer
-                m.update_fisher(task=task)
-        log.info(f'used capacity: {used_capacity(model.nnet, 20)}')
+        if isinstance(model, QNetWrapper):
+            trainExamples = []
+            with open(f'./temp/checkpoint_{args.numIters - 1}.pth.tar.examples', "rb") as f:
+                trainExamplesHistory = Unpickler(f).load()
+                for e in trainExamplesHistory:
+                    trainExamples.extend(e)
+            estimate_fisher(task, 'cuda:0', model, trainExamples)
+            for m in model.nnet.modules():
+                if isinstance(m, Linear_Q) or isinstance(m, Conv2d_Q):
+                    # update bits according to information gain
+                    m.update_bits(task=task, C=0.5/math.log(2))
+                    # do quantization
+                    m.sync_weight()
+                    # update Fisher in the buffer
+                    m.update_fisher(task=task)
+            log.info(f'used capacity: {used_capacity(model.nnet, 20)}')
 
 if __name__ == "__main__":
     main()
