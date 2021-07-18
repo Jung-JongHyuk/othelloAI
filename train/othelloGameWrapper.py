@@ -95,7 +95,7 @@ class OthelloGameWrapper(GameModel):
         return board.tostring()
 
     def convertToBoardClass(self, board):
-        result = Board(self.boardSize, 0)
+        result = Board(self.boardSize, self.numOfBlock)
         result.board = board.tolist()
         return result
 
@@ -107,7 +107,7 @@ class OthelloGameWrapper(GameModel):
             return (int(action / colSize), action % colSize)
     
     def posToAction(self, pos):
-        return pos[0] * self.boardSize[0] + pos[1]
+        return pos[0] * self.boardSize[1] + pos[1]
     
     def convertToPlayerIndexInBoardClass(self, player):
         #1이 학습 모델의 인덱스이자 선공
