@@ -5,5 +5,5 @@ from boardViewController import BoardViewController
 
 if __name__ == "__main__":
     app = QApplication([])
-    boardViewController = BoardViewController((8,8), 0)
+    boardViewController = BoardViewController((6,6), 0)
     app.exec_()

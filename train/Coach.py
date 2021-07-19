@@ -126,7 +126,7 @@ class Coach():
 
             self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='curr.pth.tar')
             log.info('PITTING AGAINST RANDOM AGENT')
-            for (boardSize, blockPosType) in [((6,6), 0), ((8,8), 0), ((8,8), 1), ((8,8), 2)]:
+            for (boardSize, blockPosType) in [((6,6), 'none'), ((8,8), 'none'), ((8,8), 'x-cross'), ((8,8), 'cross')]:
                 wins = self.playWithRandomAgent(boardSize, blockPosType, 100)
                 log.info(f'{boardSize}, {blockPosType} : NEW/RANDOM WINS : {wins[0]} / {wins[1]} ; DRAWS : {100 - wins[0] - wins[1]}')
 
@@ -146,22 +146,14 @@ class Coach():
     
     def playWithRandomAgent(self, boardSize, blockPosType, iterCount):
         wins = [0,0]
-        blockPos = []
-        if blockPosType == 1:
-            blockPos = [(0,0), (1,1), (2,2), (0,7), (1,6), (2,5), (7,0), (6,1), (5,2), (7,7), (6,6), (5,5)]
-        elif blockPosType == 2:
-            blockPos = [(0,3), (0,4), (1,3), (1,4), (3,0), (4,0), (3,1), (4,1), (7,3), (7,4), (6,3), (6,4), (3,7), (3,6), (4,7), (4,6)]
-
         for _ in tqdm(range(int(iterCount / 2)), desc=f"Play with random(1), blockPosType: {blockPosType}"):
-            board = Board(boardSize, 0)
-            board.setBlock(blockPos)
+            board = Board(boardSize, blockPosType= blockPosType)
             game = Game(board, (AIPlayer(boardSize, 'curr.pth.tar'), RandomPlayer()))
             winner = game.play(printBoard= False)
             if winner != None:
                 wins[winner] = wins[winner] + 1
         for _ in tqdm(range(int(iterCount / 2)), desc=f"Play with random(2), blockPosType: {blockPosType}"):
-            board = Board(boardSize, 0)
-            board.setBlock(blockPos)
+            board = Board(boardSize, blockPosType= blockPosType)
             game = Game(board, (RandomPlayer(), AIPlayer(boardSize, 'curr.pth.tar')))
             winner = game.play(printBoard= False)
             if winner != None:

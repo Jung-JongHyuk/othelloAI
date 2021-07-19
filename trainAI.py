@@ -69,7 +69,7 @@ def main():
     game = OthelloGameWrapper(boardSize= (6,6))
     model = OthelloNetWrapper(game)
     
-    for (task, (boardSize, blockPosType)) in enumerate([((6,6), 0), ((8,8), 1), ((8,8), 2)]):
+    for (task, (boardSize, blockPosType)) in enumerate([((6,6), 'none'), ((8,8), 'x-cross'), ((8,8), 'cross')]):
         log.info(f'task {task}: {boardSize}, {blockPosType}')
         game = OthelloGameWrapper(boardSize= boardSize, blockPosType= blockPosType)
         coach = Coach(game, model, args)
