@@ -2,13 +2,48 @@ import random
 import sys
 
 class Board:
-    def __init__(self, boardSize, numOfBlock):
-        (self.rowSize, self.colSize, self.numOfBlock) = (boardSize[0], boardSize[1], numOfBlock)
+    def __init__(self, boardSize, blockPosType= "none", numOfBlock= 0):
+        (self.rowSize, self.colSize, self.blockPosType, self.numOfBlock) = (boardSize[0], boardSize[1], blockPosType, numOfBlock)
         (self.PLAYER_0, self.PLAYER_1, self.VOID, self.BLOCK) = (0, 1, 2, 3)
         self.board = [[self.VOID for col in range(self.colSize)] for row in range(self.rowSize)]
-        # self.currentTurnPlayer = self.PLAYER_0
         self.placeInitialPiece()
-        self.makeBlock()
+        if blockPosType == "random":
+            self.makeRandomBlock(numOfBlock)
+        else:
+            blockPos = []
+            if blockPosType == "x-cross":
+                blockPos = self.makeXCrossBlockPos()
+            elif blockPosType == "cross":
+                blockPos = self.makeCrossBlockPos()
+            elif blockPosType != "none":
+                print("invalid blockPosType")
+                exit()
+            self.setBlock(blockPos)
+
+    def makeCrossBlockPos(self):
+        blockPos = []
+        crossLength = int((min(self.rowSize, self.colSize) - 4) / 2)
+        (midRowIdx, midColIdx) = (int(self.rowSize / 2), int(self.colSize / 2))
+        for i in range(crossLength):
+            blockPos.append((i, midColIdx - 1))
+            blockPos.append((i, midColIdx))
+            blockPos.append((midRowIdx - 1, i))
+            blockPos.append((midRowIdx, i))
+            blockPos.append((self.rowSize - i - 1, midColIdx - 1))
+            blockPos.append((self.rowSize - i - 1, midColIdx))
+            blockPos.append((midRowIdx - 1, self.colSize - i - 1))
+            blockPos.append((midRowIdx, self.colSize - i - 1))
+        return blockPos
+
+    def makeXCrossBlockPos(self):
+        blockPos = []
+        crossLength = int((min(self.rowSize, self.colSize) - 2) / 2)
+        for i in range(crossLength):
+            blockPos.append((i, i))
+            blockPos.append((i, self.colSize - i - 1))
+            blockPos.append((self.rowSize - i - 1, i))
+            blockPos.append((self.rowSize - i - 1, self.colSize - i - 1))
+        return blockPos
 
     def placeInitialPiece(self):
         if self.rowSize % 2 != 0 or self.colSize % 2 != 0:
@@ -23,7 +58,7 @@ class Board:
     def isInitialPiecePos(self, rowIndex, colIndex):
         return (rowIndex >= self.rowSize / 2 - 1 and rowIndex <= self.rowSize / 2) and (colIndex >= self.colSize / 2 - 1 and colIndex <= self.colSize / 2)
 
-    def makeBlock(self):
+    def makeRandomBlock(self):
         voidCoordinate = []
         for rowIndex in range(self.rowSize):
             for colIndex in range(self.colSize):

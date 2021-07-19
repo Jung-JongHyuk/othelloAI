@@ -6,19 +6,12 @@ sys.path.append('../')
 from board import Board
 
 class OthelloGameWrapper(GameModel):
-    def __init__(self, boardSize, blockPosType= 0):
+    def __init__(self, boardSize, blockPosType):
         self.boardSize = boardSize
         self.blockPosType = blockPosType
-        if self.boardSize[0] != self.boardSize[1] and self.blockPosType != 0:
-            print("invalid blockPosType")
-            exit()
 
     def getInitBoard(self):
-        board = Board(self.boardSize, numOfBlock= 0)
-        if self.blockPosType == 1: # type 1: cross shape
-            board.setBlock([(0,0), (1,1), (2,2), (0,7), (1,6), (2,5), (7,0), (6,1), (5,2), (7,7), (6,6), (5,5)])
-        elif self.blockPosType == 2: # type 2: center divided
-            board.setBlock([(0,3), (0,4), (1,3), (1,4), (3,0), (4,0), (3,1), (4,1), (7,3), (7,4), (6,3), (6,4), (3,7), (3,6), (4,7), (4,6)])
+        board = Board(self.boardSize, blockPosType= self.blockPosType)
         return np.array(board.board)
     
     def getBoardSize(self):
