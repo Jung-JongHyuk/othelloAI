@@ -15,6 +15,8 @@ class Board:
                 blockPos = self.makeXCrossBlockPos()
             elif blockPosType == "cross":
                 blockPos = self.makeCrossBlockPos()
+            elif blockPosType == "octagon":
+                blockPos = self.makeOctagonBlockPos()
             elif blockPosType != "none":
                 print("invalid blockPosType")
                 exit()
@@ -43,6 +45,16 @@ class Board:
             blockPos.append((i, self.colSize - i - 1))
             blockPos.append((self.rowSize - i - 1, i))
             blockPos.append((self.rowSize - i - 1, self.colSize - i - 1))
+        return blockPos
+    
+    def makeOctagonBlockPos(self):
+        blockPos = []
+        crossLength = int(min(self.rowSize, self.colSize) / 2)
+        for i in range(crossLength):
+            blockPos.append((int(self.rowSize / 2) - i - 1, i))
+            blockPos.append((int(self.rowSize / 2) + i, i))
+            blockPos.append((self.rowSize - i - 1, int(self.colSize / 2 + i)))
+            blockPos.append((int(self.rowSize / 2) - i - 1, self.colSize - i - 1))
         return blockPos
 
     def placeInitialPiece(self):
@@ -165,15 +177,7 @@ class Board:
         print("")
 
 if __name__ == "__main__":
-    board = Board((8,8),5)
+    board = Board((6,6), 'octagon')
     board.printBoard()
-
-    while True:
-        print("currentPlayer: ", board.currentTurnPlayer)
-        board.printBoard()
-        print(board.getPlaceableCoordinates(board.currentTurnPlayer))
-        coordinateX = int(input())
-        coordinateY = int(input())
-        board.placePiece(coordinateX, coordinateY, board.currentTurnPlayer)
 
 

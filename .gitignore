@@ -6,3 +6,4 @@ trainLogBefore.log
 trainLog/
 presentation/
 *.pyc
+model/

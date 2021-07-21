@@ -126,7 +126,7 @@ class Coach():
 
             self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='curr.pth.tar')
             log.info('PITTING AGAINST RANDOM AGENT')
-            for (boardSize, blockPosType) in [((6,6), 'none'), ((8,8), 'none'), ((8,8), 'x-cross'), ((8,8), 'cross')]:
+            for (boardSize, blockPosType) in [((6,6), 'none'), ((8,8), 'none'), ((6,6), 'x-cross'), ((8,8), 'x-cross'), ((6,6), 'octagon'), ((8,8), 'octagon')]:
                 wins = self.playWithRandomAgent(boardSize, blockPosType, 100)
                 log.info(f'{boardSize}, {blockPosType} : NEW/RANDOM WINS : {wins[0]} / {wins[1]} ; DRAWS : {100 - wins[0] - wins[1]}')
 
@@ -141,8 +141,8 @@ class Coach():
                 self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
             else:
                 log.info('ACCEPTING NEW MODEL')
-                self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
+            self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
     
     def playWithRandomAgent(self, boardSize, blockPosType, iterCount):
         wins = [0,0]
@@ -161,7 +161,7 @@ class Coach():
         return wins
 
     def getCheckpointFile(self, iteration):
-        return 'checkpoint_' + str(iteration) + '.pth.tar'
+        return f'{type(self.nnet).__name__}_{self.game.boardSize}_{self.game.blockPosType}_checkpoint_{iteration}.pth.tar'
 
     def saveTrainExamples(self, iteration):
         folder = self.args.checkpoint

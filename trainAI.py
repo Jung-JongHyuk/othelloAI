@@ -15,13 +15,13 @@ log.setLevel(logging.DEBUG)
 while log.hasHandlers():
     log.removeHandler(log.handlers[0])
 streamHandler = logging.StreamHandler()
-fileHandler = logging.FileHandler('trainLog.log', 'w')
+fileHandler = logging.FileHandler('fisherLog.log', 'w')
 log.propagate = False
 log.addHandler(streamHandler)
 log.addHandler(fileHandler)
 
 args = dotdict({
-    'numIters': 20,
+    'numIters': 50,
     'numEps': 100,              # Number of complete self-play games to simulate during a new iteration.
     'tempThreshold': 15,        #
     'updateThreshold': 0.6,     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
@@ -66,14 +66,33 @@ def main():
 
     torch.cuda.empty_cache()
 
-    game = OthelloGameWrapper(boardSize= (6,6))
-    model = OthelloNetWrapper(game)
+    game = OthelloGameWrapper(boardSize= (6,6), blockPosType= 'none')
+    model = QNetWrapper(game)
+    model.load_checkpoint(folder='./temp/', filename='QNetWrapper_(6, 6)_none_checkpoint_29.pth.tar')
+    # trainExamples = []
+    # with open(f'./temp/QNetWrapper_(6, 6)_none_checkpoint_28.pth.tar.examples', "rb") as f:
+    #     trainExamplesHistory = Unpickler(f).load()
+    #     for e in trainExamplesHistory:
+    #         trainExamples.extend(e)
+
+    # estimate_fisher(0, 'cuda:0', model, trainExamples)
+    # for m in model.nnet.modules():
+    #     if isinstance(m, Linear_Q) or isinstance(m, Conv2d_Q):
+    #         # update bits according to information gain
+    #         m.update_bits(task=0, C=0.5/math.log(2))
+    #         # do quantization
+    #         m.sync_weight()
+    #         # update Fisher in the buffer
+    #         m.update_fisher(task=0)
+    # print(used_capacity(model.nnet, 20))
     
-    for (task, (boardSize, blockPosType)) in enumerate([((6,6), 'none'), ((8,8), 'x-cross'), ((8,8), 'cross')]):
+    # for (task, (boardSize, blockPosType)) in enumerate([((6,6), 'none'), ((6,6), 'x-cross'), ((6,6), 'cross'), ((6,6), 'octagon')]):
+    for (task, (boardSize, blockPosType)) in enumerate([((6,6), 'x-cross')]):
         log.info(f'task {task}: {boardSize}, {blockPosType}')
         game = OthelloGameWrapper(boardSize= boardSize, blockPosType= blockPosType)
         coach = Coach(game, model, args)
         coach.learn()
+        model.save_checkpoint(folder= './model/', filename= f'{boardSize}_{blockPosType}_{type(model.nnet).__name__}.tar')
         if isinstance(model, QNetWrapper):
             trainExamples = []
             with open(f'./temp/checkpoint_{args.numIters - 1}.pth.tar.examples', "rb") as f:
@@ -89,7 +108,9 @@ def main():
                     m.sync_weight()
                     # update Fisher in the buffer
                     m.update_fisher(task=task)
-            log.info(f'used capacity: {used_capacity(model.nnet, 20)}')
+            freezeResult = used_capacity(model.nnet, 20)
+            log.info(freezeResult[1])
+            log.info(f'used capacity: f{freezeResult[0]}')
 
 if __name__ == "__main__":
     main()

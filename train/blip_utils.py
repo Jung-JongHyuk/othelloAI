@@ -173,14 +173,14 @@ def estimate_fisher(task, device, model, examples, batch_size=100, num_batch=80,
 def used_capacity(model, max_bit):
     used_bits = 0
     total_bits = 0
+    layerResult = []
     for m in model.modules():
         if isinstance(m, Linear_Q) or isinstance(m, Conv2d_Q):
-            (hist, bins) = np.histogram(m.bit_alloc_w.cpu().numpy().reshape((-1,)), np.arange(0,21,1))
-            print(m._get_name())
-            print(hist)
+            (hist, bins) = np.histogram(m.bit_alloc_w.cpu().numpy().reshape((-1,)), np.arange(0,max_bit + 1,1))
+            layerResult.append((m._get_name(), hist))
             used_bits += m.bit_alloc_w.sum().item()
             total_bits += max_bit*m.weight.numel()
             if m.bias is not None:
                 used_bits += m.bit_alloc_b.sum().item()
                 total_bits += max_bit*m.bias.numel()
-    return float(used_bits)/float(total_bits)
+    return (float(used_bits)/float(total_bits), layerResult)
