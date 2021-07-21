@@ -127,8 +127,7 @@ def estimate_fisher(task, device, model, examples, batch_size=100, num_batch=80,
 
     pi_losses = AverageMeter()
     v_losses = AverageMeter()
-
-    batch_count = int(len(examples) / model.nnet.args.batch_size)
+    criterion = nn.CrossEntropyLoss()
 
     t = tqdm(range(num_batch), desc='estimating fisher')
     for _ in t:
@@ -144,18 +143,12 @@ def estimate_fisher(task, device, model, examples, batch_size=100, num_batch=80,
 
         # compute output
         out_pi, out_v = model.nnet(boards)
-        l_pi = model.loss_pi(target_pis, out_pi)
-        l_v = model.loss_v(target_vs, out_v)
-        total_loss = l_pi + l_v
-
-        # record loss
-        pi_losses.update(l_pi.item(), boards.size(0))
-        v_losses.update(l_v.item(), boards.size(0))
-        t.set_postfix(Loss_pi=pi_losses, Loss_v=v_losses)
+        targets = Categorical(logits= torch.exp(out_pi)).sample()
+        loss = criterion(out_pi, targets)
 
         # compute gradient and do SGD step
         model.nnet.zero_grad()
-        total_loss.backward()
+        loss.backward()
         update_Fisher(model.nnet)
         model.nnet.zero_grad()
     

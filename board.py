@@ -2,8 +2,8 @@ import random
 import sys
 
 class Board:
-    def __init__(self, boardSize, blockPosType= "none", numOfBlock= 0):
-        (self.rowSize, self.colSize, self.blockPosType, self.numOfBlock) = (boardSize[0], boardSize[1], blockPosType, numOfBlock)
+    def __init__(self, boardSize, mode= "none", blockPosType= "none", numOfBlock= 0):
+        (self.rowSize, self.colSize, self.blockPosType, self.numOfBlock, self.mode) = (boardSize[0], boardSize[1], blockPosType, numOfBlock, mode)
         (self.PLAYER_0, self.PLAYER_1, self.VOID, self.BLOCK) = (0, 1, 2, 3)
         self.board = [[self.VOID for col in range(self.colSize)] for row in range(self.rowSize)]
         self.placeInitialPiece()
@@ -141,7 +141,27 @@ class Board:
                     self.board[currentRowIndex][currentColIndex] = playerIndex
                     (currentRowIndex, currentColIndex) = (currentRowIndex + rowMoveDirections[i], currentColIndex + colMoveDirections[i])
         self.board[rowIndex][colIndex] = playerIndex
-        # self.currentTurnPlayer = self.counterPlayerIndex(playerIndex)
+
+        if self.mode == "conway":
+            nextBoard = self.board
+            for row in range(self.rowSize):
+                for col in range(self.colSize):
+                    pieceCount = self.countAdjPiece((row,col))
+                    if self.board[row][col] == self.PLAYER_0 and pieceCount[self.PLAYER_1] > sum(pieceCount[:-1]) / 2:
+                        nextBoard[row][col] = self.PLAYER_1
+                    elif self.board[row][col] == self.PLAYER_1 and pieceCount[self.PLAYER_0] > sum(pieceCount[:-1]) / 2:
+                        nextBoard[row][col] = self.PLAYER_0
+            self.board = nextBoard
+
+    def countAdjPiece(self, pos):
+        rowMoveDirections = [-1, -1, 0, 1, 1, 1, 0, -1]
+        colMoveDirections = [0, 1, 1, 1, 0, -1, -1, -1]
+        pieceCount = [0,0,0,0]
+        for (drow, dcol) in zip(rowMoveDirections, colMoveDirections):
+            adjPos = (pos[0] + drow, pos[1] + dcol)
+            if not self.isIndexOutOfRange(adjPos[0], adjPos[1]):
+                pieceCount[self.board[adjPos[0]][adjPos[1]]] = pieceCount[self.board[adjPos[0]][adjPos[1]]] + 1
+        return pieceCount
     
     # return board status [player0 piece size, player1 piece size, ... void size]
     def getBoardStatus(self):

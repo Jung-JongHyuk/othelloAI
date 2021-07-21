@@ -14,6 +14,7 @@ from game import Game
 from board import Board
 from player.randomPlayer import RandomPlayer
 from player.aiPlayer import AIPlayer
+from trainTasks import tasks
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
@@ -125,10 +126,15 @@ class Coach():
             nmcts = MCTS(self.game, self.nnet, self.args)
 
             self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='curr.pth.tar')
+            currLearningTask = self.nnet.currTask
             log.info('PITTING AGAINST RANDOM AGENT')
-            for (boardSize, blockPosType) in [((6,6), 'none'), ((8,8), 'none'), ((6,6), 'x-cross'), ((8,8), 'x-cross'), ((6,6), 'octagon'), ((8,8), 'octagon')]:
+            for i in range(currLearningTask + 1):
+                self.nnet.setCurrTask(i)
+                boardSize = tasks[i]["boardSize"]
+                blockPosType = tasks[i]["blockPosType"]
                 wins = self.playWithRandomAgent(boardSize, blockPosType, 100)
                 log.info(f'{boardSize}, {blockPosType} : NEW/RANDOM WINS : {wins[0]} / {wins[1]} ; DRAWS : {100 - wins[0] - wins[1]}')
+            self.nnet.setCurrTask(currLearningTask)
 
             log.info('PITTING AGAINST PREVIOUS VERSION')
             arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=0)),

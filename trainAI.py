@@ -7,8 +7,10 @@ from train.Coach import Coach
 from train.othelloGameWrapper import OthelloGameWrapper
 from train.network.othelloNetWrapper import OthelloNetWrapper
 from train.network.QNetWrapper import QNetWrapper
+from train.network.PQNetWrapper import PQNetWrapper
 from train.utils import *
 from train.blip_utils import *
+from trainTasks import tasks
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
@@ -66,29 +68,15 @@ def main():
 
     torch.cuda.empty_cache()
 
-    game = OthelloGameWrapper(boardSize= (6,6), blockPosType= 'none')
-    model = QNetWrapper(game)
-    model.load_checkpoint(folder='./temp/', filename='QNetWrapper_(6, 6)_none_checkpoint_29.pth.tar')
-    # trainExamples = []
-    # with open(f'./temp/QNetWrapper_(6, 6)_none_checkpoint_28.pth.tar.examples', "rb") as f:
-    #     trainExamplesHistory = Unpickler(f).load()
-    #     for e in trainExamplesHistory:
-    #         trainExamples.extend(e)
-
-    # estimate_fisher(0, 'cuda:0', model, trainExamples)
-    # for m in model.nnet.modules():
-    #     if isinstance(m, Linear_Q) or isinstance(m, Conv2d_Q):
-    #         # update bits according to information gain
-    #         m.update_bits(task=0, C=0.5/math.log(2))
-    #         # do quantization
-    #         m.sync_weight()
-    #         # update Fisher in the buffer
-    #         m.update_fisher(task=0)
-    # print(used_capacity(model.nnet, 20))
+    game = OthelloGameWrapper(boardSize= (6,6), blockPosType= "none")
+    ModelType = PQNetWrapper
+    model = ModelType(game)
     
-    # for (task, (boardSize, blockPosType)) in enumerate([((6,6), 'none'), ((6,6), 'x-cross'), ((6,6), 'cross'), ((6,6), 'octagon')]):
-    for (task, (boardSize, blockPosType)) in enumerate([((6,6), 'x-cross')]):
+    for (task, param) in enumerate(tasks):
+        boardSize = param["boardSize"]
+        blockPosType = param["blockPosType"]
         log.info(f'task {task}: {boardSize}, {blockPosType}')
+        model.setCurrTask(task)
         game = OthelloGameWrapper(boardSize= boardSize, blockPosType= blockPosType)
         coach = Coach(game, model, args)
         coach.learn()
