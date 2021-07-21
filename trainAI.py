@@ -7,8 +7,10 @@ from train.Coach import Coach
 from train.othelloGameWrapper import OthelloGameWrapper
 from train.network.othelloNetWrapper import OthelloNetWrapper
 from train.network.QNetWrapper import QNetWrapper
+from train.network.PQNetWrapper import PQNetWrapper
 from train.utils import *
 from train.blip_utils import *
+from trainTasks import tasks
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
@@ -66,15 +68,19 @@ def main():
 
     torch.cuda.empty_cache()
 
-    game = OthelloGameWrapper(boardSize= (6,6))
-    model = OthelloNetWrapper(game)
+    game = OthelloGameWrapper(boardSize= (6,6), blockPosType= "none")
+    ModelType = PQNetWrapper
+    model = ModelType(game)
     
-    for (task, (boardSize, blockPosType)) in enumerate([((6,6), 'none'), ((8,8), 'x-cross'), ((8,8), 'cross')]):
+    for (task, param) in enumerate(tasks):
+        boardSize = param["boardSize"]
+        blockPosType = param["blockPosType"]
         log.info(f'task {task}: {boardSize}, {blockPosType}')
+        model.setCurrTask(task)
         game = OthelloGameWrapper(boardSize= boardSize, blockPosType= blockPosType)
         coach = Coach(game, model, args)
         coach.learn()
-        if isinstance(model, QNetWrapper):
+        if isinstance(model, PQNetWrapper):
             trainExamples = []
             with open(f'./temp/checkpoint_{args.numIters - 1}.pth.tar.examples', "rb") as f:
                 trainExamplesHistory = Unpickler(f).load()

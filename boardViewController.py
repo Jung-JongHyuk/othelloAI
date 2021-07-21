@@ -13,7 +13,7 @@ class BoardViewController:
     def __init__(self, boardSize, numOfBlank):
         self.boardSize = boardSize
         self.view = BoardView(boardSize)
-        self.board = Board(boardSize, blockPosType= "x-cross", numOfBlock= numOfBlank)
+        self.board = Board(boardSize, mode= "conway", blockPosType= "x-cross", numOfBlock= numOfBlank)
         self.prevBoard = copy.deepcopy(self.board)
         self.Players = (DummyPlayer(), DummyPlayer())
         self.game = Game(self.board, self.Players)

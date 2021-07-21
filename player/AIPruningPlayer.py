@@ -16,11 +16,11 @@ args = dotdict({
 })
 
 class AIPruningPlayer(AlphaBetaPruningPlayer):
-    def __init__(self, boardSize, modelName, seachDepth):
+    def __init__(self, boardSize, seachDepth, folderName= './temp', modelName= 'best.pth.tar'):
         super().__init__(seachDepth)
         self.gameWrapper = OthelloGameWrapper(boardSize)
         self.agent = OthelloNetWrapper(self.gameWrapper)
-        self.agent.load_checkpoint(folder='./temp', filename=modelName)
+        self.agent.load_checkpoint(folder=folderName, filename=modelName)
     
     def getScore(self, currGame):
         boardData = np.array(currGame.board.board)
