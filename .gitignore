@@ -1,9 +1,8 @@
 .vscode/settings.json
 temp/
 paper/
-trainLog.log
-trainLogBefore.log
-trainLog/
+*.log
+*.txt
 presentation/
 *.pyc
 model/

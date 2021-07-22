@@ -6,6 +6,7 @@ from pickle import Pickler, Unpickler
 from random import shuffle
 
 import numpy as np
+import copy
 from tqdm import tqdm
 
 from .Arena import Arena
@@ -120,6 +121,7 @@ class Coach():
             # training new network, keeping a copy of the old one
             self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
             self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
+
             pmcts = MCTS(self.game, self.pnet, self.args)
 
             self.nnet.train(trainExamples)
@@ -136,6 +138,7 @@ class Coach():
                 log.info(f'{boardSize}, {blockPosType} : NEW/RANDOM WINS : {wins[0]} / {wins[1]} ; DRAWS : {100 - wins[0] - wins[1]}')
             self.nnet.setCurrTask(currLearningTask)
 
+            self.pnet.setCurrTask(currLearningTask)
             log.info('PITTING AGAINST PREVIOUS VERSION')
             arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=0)),
                           lambda x: np.argmax(nmcts.getActionProb(x, temp=0)), self.game)
@@ -154,13 +157,13 @@ class Coach():
         wins = [0,0]
         for _ in tqdm(range(int(iterCount / 2)), desc=f"Play with random(1), blockPosType: {blockPosType}"):
             board = Board(boardSize, blockPosType= blockPosType)
-            game = Game(board, (AIPlayer(boardSize, 'curr.pth.tar'), RandomPlayer()))
+            game = Game(board, (AIPlayer(boardSize, task= self.nnet.currTask, folderName= './temp/', modelName= 'curr.pth.tar'), RandomPlayer()))
             winner = game.play(printBoard= False)
             if winner != None:
                 wins[winner] = wins[winner] + 1
         for _ in tqdm(range(int(iterCount / 2)), desc=f"Play with random(2), blockPosType: {blockPosType}"):
             board = Board(boardSize, blockPosType= blockPosType)
-            game = Game(board, (RandomPlayer(), AIPlayer(boardSize, 'curr.pth.tar')))
+            game = Game(board, (RandomPlayer(), AIPlayer(boardSize, task= self.nnet.currTask, folderName= './temp/', modelName= 'curr.pth.tar')))
             winner = game.play(printBoard= False)
             if winner != None:
                 wins[1 - winner] = wins[1 - winner] + 1

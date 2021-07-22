@@ -1,3 +1,4 @@
+from train.network.ExtendableLayer import ExtendableLayer
 import torch
 import torch.optim as optim
 import numpy as np
@@ -95,6 +96,9 @@ class PQNetWrapper(NeuralNet):
         # print('PREDICTION TIME TAKEN : {0:03f}'.format(time.time()-start))
         return torch.exp(pi).data.cpu().numpy()[0], v.data.cpu().numpy()[0]
     
+    def prepareNextTask(self, nextTask):
+        self.nnet.valueFc.extendLayer(nextTask)
+    
     def loss_pi(self, targets, outputs):
         return -torch.sum(targets * outputs) / targets.size()[0]
 
@@ -119,4 +123,8 @@ class PQNetWrapper(NeuralNet):
             raise ("No model in path {}".format(filepath))
         map_location = None if args.cuda else 'cpu'
         checkpoint = torch.load(filepath, map_location=map_location)
+        self.nnet.load_state_dict(checkpoint['state_dict'], strict= False)
+        for m in self.nnet.modules():
+            if isinstance(m, ExtendableLayer):
+                m.fitLayerSize()
         self.nnet.load_state_dict(checkpoint['state_dict'])

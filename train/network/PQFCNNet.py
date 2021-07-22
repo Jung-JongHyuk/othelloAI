@@ -22,7 +22,7 @@ class PQFCNNet(nn.Module):
         self.convBn3 = nn.BatchNorm2d(args.num_channels)
         self.convBn4 = nn.BatchNorm2d(args.num_channels)
 
-        self.valueFc = ExtendableLayer(Linear_Q, args.num_channels, 1)
+        self.valueFc = ExtendableLayer(nn.Linear, args.num_channels, 1)
         self.piFc = ExtendableLayer(Linear_Q, int(args.num_channels / 4), 1)
 
         self.conv5 = ExtendableLayer(Conv2d_Q, args.num_channels, int(args.num_channels / 2), 3, stride=1, padding=1)

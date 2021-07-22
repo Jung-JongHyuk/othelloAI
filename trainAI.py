@@ -23,7 +23,7 @@ log.addHandler(streamHandler)
 log.addHandler(fileHandler)
 
 args = dotdict({
-    'numIters': 50,
+    'numIters': 40,
     'numEps': 100,              # Number of complete self-play games to simulate during a new iteration.
     'tempThreshold': 15,        #
     'updateThreshold': 0.6,     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
@@ -81,9 +81,9 @@ def main():
         coach = Coach(game, model, args)
         coach.learn()
         model.save_checkpoint(folder= './model/', filename= f'{boardSize}_{blockPosType}_{type(model.nnet).__name__}.tar')
-        if isinstance(model, QNetWrapper):
+        if isinstance(model, PQNetWrapper):
             trainExamples = []
-            with open(f'./temp/checkpoint_{args.numIters - 1}.pth.tar.examples', "rb") as f:
+            with open(f'./temp/PQNetWrapper_(6, 6)_none_checkpoint_{args.numIters - 1}.pth.tar.examples', "rb") as f:
                 trainExamplesHistory = Unpickler(f).load()
                 for e in trainExamplesHistory:
                     trainExamples.extend(e)
@@ -97,8 +97,15 @@ def main():
                     # update Fisher in the buffer
                     m.update_fisher(task=task)
             freezeResult = used_capacity(model.nnet, 20)
-            log.info(freezeResult[1])
-            log.info(f'used capacity: f{freezeResult[0]}')
+            for (name, info) in freezeResult[1]:
+                log.info(f"{name}: {info}")
+            log.info(f'used capacity: {freezeResult[0]}')
+        model.prepareNextTask(task + 1)
 
 if __name__ == "__main__":
+    # ModelType = PQNetWrapper
+    # game = OthelloGameWrapper(boardSize= (6,6), blockPosType= "none")
+    # model = ModelType(game)
+    # model.load_checkpoint(folder=args.checkpoint, filename='temp.pth.tar')
+    # print(model.nnet.valueFc.insertedTaskPoint)
     main()

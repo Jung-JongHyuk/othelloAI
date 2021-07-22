@@ -2,6 +2,7 @@ import torch
 import numpy as np
 from train.network.othelloNetWrapper import OthelloNetWrapper
 from train.network.QNetWrapper import QNetWrapper
+from train.network.PQNetWrapper import PQNetWrapper
 from train.utils import *
 from train.othelloGameWrapper import OthelloGameWrapper
 from player.playerInterface import PlayerInterface
@@ -16,11 +17,12 @@ args = dotdict({
 })
 
 class AIPlayer(PlayerInterface):
-    def __init__(self, boardSize, folderName= './temp', modelName='best.pth.tar'):
+    def __init__(self, boardSize, task, folderName= './temp', modelName='best.pth.tar'):
         super().__init__()
         self.gameWrapper = OthelloGameWrapper(boardSize, blockPosType= 'none')
         # self.agent = OthelloNetWrapper(self.gameWrapper)
-        self.agent = QNetWrapper(self.gameWrapper)
+        self.agent = PQNetWrapper(self.gameWrapper)
+        self.agent.setCurrTask(task)
         self.agent.load_checkpoint(folder=folderName, filename=modelName)
     
     def decide(self, board):
@@ -37,7 +39,5 @@ class AIPlayer(PlayerInterface):
                 validMoveIndexs = np.argwhere(validMoves == 1).reshape((-1,))
                 decision = np.random.choice(validMoveIndexs)
             return self.gameWrapper.actionToPos(decision)
-
-
 
 

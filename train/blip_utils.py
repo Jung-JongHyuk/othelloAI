@@ -142,9 +142,14 @@ def estimate_fisher(task, device, model, examples, batch_size=100, num_batch=80,
             boards, target_pis, target_vs = boards.contiguous().cuda(), target_pis.contiguous().cuda(), target_vs.contiguous().cuda()
 
         # compute output
-        out_pi, out_v = model.nnet(boards)
-        targets = Categorical(logits= torch.exp(out_pi)).sample()
-        loss = criterion(out_pi, targets)
+        out_pi, out_v = model.nnet(boards, task)
+        targets = Categorical(probs= torch.exp(out_pi)).sample()
+        actionSize = out_pi.shape[1]
+        oneHotTargets = torch.zeros((batch_size, actionSize))
+        if torch.cuda.is_available():
+            oneHotTargets = oneHotTargets.cuda()
+        oneHotTargets[range(batch_size), targets] = 1
+        loss = model.loss_pi(out_pi, oneHotTargets)
 
         # compute gradient and do SGD step
         model.nnet.zero_grad()
