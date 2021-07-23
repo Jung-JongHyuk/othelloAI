@@ -15,8 +15,9 @@ class ExtendableLayer(nn.Linear):
     
     def forward(self, input, task):
         layerIdx = bisect.bisect_right(self.insertedTaskPoint.tolist(), task)
-        outputs = [layer(input) for layer in self.layers[:layerIdx]]
-        return sum(outputs)
+        return self.layers[layerIdx - 1](input)
+        # outputs = [layer(input) for layer in self.layers[:layerIdx]]
+        # return sum(outputs)
     
     def fitLayerSize(self):
         currLayerSize = len(self.layers)

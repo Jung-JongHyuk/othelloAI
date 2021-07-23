@@ -4,9 +4,13 @@ import sys
 from collections import deque
 from pickle import Pickler, Unpickler
 from random import shuffle
+from train.network.PQFCNNet import PQFCNNet
 
+import torch
+import torch.nn as nn
 import numpy as np
 import copy
+from train.network.quantizedLayer import Linear_Q, Conv2d_Q
 from tqdm import tqdm
 
 from .Arena import Arena
@@ -90,11 +94,11 @@ class Coach():
         only if it wins >= updateThreshold fraction of games.
         """
 
-        for i in range(1, self.args.numIters + 1):
+        for iter in range(1, self.args.numIters + 1):
             # bookkeeping
-            log.info(f'Starting Iter #{i} ...')
+            log.info(f'Starting Iter #{iter} ...')
             # examples of the iteration
-            if not self.skipFirstSelfPlay or i > 1:
+            if not self.skipFirstSelfPlay or iter > 1:
                 iterationTrainExamples = deque([], maxlen=self.args.maxlenOfQueue)
 
                 for _ in tqdm(range(self.args.numEps), desc="Self Play"):
@@ -110,7 +114,7 @@ class Coach():
                 self.trainExamplesHistory.pop(0)
             # backup history to a file
             # NB! the examples were collected using the model from the previous iteration, so (i-1)  
-            self.saveTrainExamples(i - 1)
+            self.saveTrainExamples(iter - 1)
 
             # shuffle examples before training
             trainExamples = []
@@ -123,8 +127,21 @@ class Coach():
             self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
 
             pmcts = MCTS(self.game, self.pnet, self.args)
-
+            # self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='curr.pth.tar')
             self.nnet.train(trainExamples)
+
+            # for (i,j) in zip(self.nnet.nnet.modules(), self.pnet.nnet.modules()):
+            #     # print(i._get_name())
+            #     # if isinstance(i, Linear_Q) or isinstance(i, Conv2d_Q):
+            #     #     i.weight.data.copy_(j.weight.data)
+            #     #     i.bias.data.copy_(j.bias.data)
+            #     #     # print("nnet weight: ", i.weight.data)
+            #     #     # print("pnet weight: ", j.weight.data)
+            #     #     # print(torch.sum(i.weight.data - j.weight.data))
+            #     if isinstance(i, nn.BatchNorm2d):
+            #         i.weight.data.copy_(j.weight.data)
+            #         i.bias.data.copy_(j.bias.data)
+
             nmcts = MCTS(self.game, self.nnet, self.args)
 
             self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='curr.pth.tar')
@@ -151,7 +168,7 @@ class Coach():
             else:
                 log.info('ACCEPTING NEW MODEL')
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
-            self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
+            self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(iter))
     
     def playWithRandomAgent(self, boardSize, blockPosType, iterCount):
         wins = [0,0]

@@ -17,10 +17,14 @@ class PQFCNNet(nn.Module):
         self.conv3 = ExtendableLayer(Conv2d_Q, int(args.num_channels / 2), args.num_channels, 3, stride=1, padding=1)
         self.conv4 = ExtendableLayer(Conv2d_Q, args.num_channels, args.num_channels, 3, stride=1, padding=1)
 
-        self.convBn1 = nn.BatchNorm2d(int(args.num_channels / 2))
-        self.convBn2 = nn.BatchNorm2d(int(args.num_channels / 2))
-        self.convBn3 = nn.BatchNorm2d(args.num_channels)
-        self.convBn4 = nn.BatchNorm2d(args.num_channels)
+        # self.convBn1 = nn.BatchNorm2d(int(args.num_channels / 2))
+        # self.convBn2 = nn.BatchNorm2d(int(args.num_channels / 2))
+        # self.convBn3 = nn.BatchNorm2d(args.num_channels)
+        # self.convBn4 = nn.BatchNorm2d(args.num_channels)
+        self.convBn1 = ExtendableLayer(nn.BatchNorm2d, int(args.num_channels / 2))
+        self.convBn2 = ExtendableLayer(nn.BatchNorm2d, int(args.num_channels / 2))
+        self.convBn3 = ExtendableLayer(nn.BatchNorm2d, args.num_channels)
+        self.convBn4 = ExtendableLayer(nn.BatchNorm2d, args.num_channels)
 
         self.valueFc = ExtendableLayer(nn.Linear, args.num_channels, 1)
         self.piFc = ExtendableLayer(Linear_Q, int(args.num_channels / 4), 1)
@@ -32,10 +36,15 @@ class PQFCNNet(nn.Module):
     def forward(self, s, task):
         #                                                           s: batch_size x board_x x board_y
         s = s.view(-1, 1, s.shape[1], s.shape[2])                # batch_size x 1 x board_x x board_y
-        s = F.relu(self.convBn1(self.conv1(s, task)))                          # batch_size x num_channels / 2 x board_x x board_y
-        s = F.relu(self.convBn2(self.conv2(s, task)))                          # batch_size x num_channels / 2 x board_x x board_y
-        s = F.relu(self.convBn3(self.conv3(s, task)))                          # batch_size x num_channels x board_x x board_y
-        s = F.relu(self.convBn4(self.conv4(s, task)))                          # batch_size x num_channels x board_x x board_y
+        # s = F.relu(self.convBn1(self.conv1(s, task)))                          # batch_size x num_channels / 2 x board_x x board_y
+        # s = F.relu(self.convBn2(self.conv2(s, task)))                          # batch_size x num_channels / 2 x board_x x board_y
+        # s = F.relu(self.convBn3(self.conv3(s, task)))                          # batch_size x num_channels x board_x x board_y
+        # s = F.relu(self.convBn4(self.conv4(s, task)))                          # batch_size x num_channels x board_x x board_y
+
+        s = F.relu(self.convBn1(self.conv1(s, task), task))                          # batch_size x num_channels / 2 x board_x x board_y
+        s = F.relu(self.convBn2(self.conv2(s, task), task))                          # batch_size x num_channels / 2 x board_x x board_y
+        s = F.relu(self.convBn3(self.conv3(s, task), task))                          # batch_size x num_channels x board_x x board_y
+        s = F.relu(self.convBn4(self.conv4(s, task), task))                          # batch_size x num_channels x board_x x board_y
 
         glbpooled = nn.AdaptiveAvgPool2d(1)(s) # batch_size x num_channels x 1 x 1
         glbpooled = glbpooled.view(-1, self.args.num_channels) # batch_size x num_channels

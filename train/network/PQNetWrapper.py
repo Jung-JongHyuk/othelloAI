@@ -1,5 +1,6 @@
 from train.network.ExtendableLayer import ExtendableLayer
 import torch
+import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 import time
@@ -44,6 +45,10 @@ class PQNetWrapper(NeuralNet):
         for epoch in range(args.epochs):
             print('EPOCH ::: ' + str(epoch + 1))
             self.nnet.train()
+            # if self.currTask > 0:
+            #     for m in self.nnet.modules():
+            #         if isinstance(m, nn.BatchNorm2d):
+            #             m.eval()
             pi_losses = AverageMeter()
             v_losses = AverageMeter()
 
@@ -77,6 +82,15 @@ class PQNetWrapper(NeuralNet):
                 total_loss.backward()
                 optimizer.step()
 
+                # for m in self.nnet.modules():
+                #     if isinstance(m, Linear_Q) or isinstance(m, Conv2d_Q):
+                #         print(m._get_name())
+                #         print(m.weight.data)
+                #         print(m.bias.data)
+                #         print(m.weight.data - m.prev_weight.data)
+                #         print(m.bias.data - m.prev_bias.data)
+                #         print("")
+                
                 for m in self.nnet.modules():
                     if isinstance(m, Linear_Q) or isinstance(m, Conv2d_Q):
                         m.clipping()
@@ -97,7 +111,12 @@ class PQNetWrapper(NeuralNet):
         return torch.exp(pi).data.cpu().numpy()[0], v.data.cpu().numpy()[0]
     
     def prepareNextTask(self, nextTask):
-        self.nnet.valueFc.extendLayer(nextTask)
+        if nextTask != 0:
+            self.nnet.valueFc.extendLayer(nextTask)
+            self.nnet.convBn1.extendLayer(nextTask)
+            self.nnet.convBn2.extendLayer(nextTask)
+            self.nnet.convBn3.extendLayer(nextTask)
+            self.nnet.convBn4.extendLayer(nextTask)
     
     def loss_pi(self, targets, outputs):
         return -torch.sum(targets * outputs) / targets.size()[0]
@@ -115,6 +134,7 @@ class PQNetWrapper(NeuralNet):
         torch.save({
             'state_dict': self.nnet.state_dict(),
         }, filepath)
+        print(f"saved in {filepath}")
 
     def load_checkpoint(self, folder='checkpoint', filename='checkpoint.pth.tar'):
         # https://github.com/pytorch/examples/blob/master/imagenet/main.py#L98

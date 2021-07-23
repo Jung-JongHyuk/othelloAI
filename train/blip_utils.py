@@ -110,7 +110,7 @@ def update_Fisher(model):
                 if m.bias is not None:
                     m.Fisher_b.data.add_((ext_grad_b.pow_(2)).sum(dim=0).data)
 
-def estimate_fisher(task, device, model, examples, batch_size=100, num_batch=80, num_round=1):
+def estimate_fisher(task, device, model, examples, batch_size=64, num_batch=80, num_round=1):
     model.nnet.eval()
 
     def _save_state(module, input, results):

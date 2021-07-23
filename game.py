@@ -58,17 +58,17 @@ if __name__ == "__main__":
     from player.aiPlayer import AIPlayer
     from player.dummyPlayer import DummyPlayer
 
-    boardSize = (8,8)
+    boardSize = (6,6)
 
-    player0 = AIPlayer(boardSize, folderName= './model', modelName='QNetWrapper_(6, 6)_none_checkpoint_28.pth.tar')
+    player0 = AIPlayer(boardSize, task= 0, folderName= './temp', modelName='best.pth_copy.tar')
     # player1 = AIPruningPlayer((6,6), modelName='best.pth.tar', seachDepth=3)
-    player1 = AIPlayer(boardSize, folderName= './model', modelName='QNetWrapper_(6, 6)_none_checkpoint_15.pth.tar')
-    # player1 = RandomPlayer()
+    # player1 = AIPlayer(boardSize, folderName= './model', modelName='QNetWrapper_(6, 6)_none_checkpoint_15.pth.tar')
+    player1 = RandomPlayer()
 
     wins = [0,0]
-    for i in range(10):
+    for i in range(100):
         board = Board(boardSize)
-        game = Game(board, (player0, player1))
+        game = Game(board, (player1, player0))
         winner = game.play(printBoard= False)
         print(winner)
         if winner != None:
