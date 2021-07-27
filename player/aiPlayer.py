@@ -17,13 +17,10 @@ args = dotdict({
 })
 
 class AIPlayer(PlayerInterface):
-    def __init__(self, boardSize, task, folderName= './temp', modelName='best.pth.tar'):
+    def __init__(self, boardSize, agent):
         super().__init__()
         self.gameWrapper = OthelloGameWrapper(boardSize, blockPosType= 'none')
-        # self.agent = OthelloNetWrapper(self.gameWrapper)
-        self.agent = PQNetWrapper(self.gameWrapper)
-        self.agent.setCurrTask(task)
-        self.agent.load_checkpoint(folder=folderName, filename=modelName)
+        self.agent = agent
     
     def decide(self, board):
         if len(board.getPlaceableCoordinates(self.playerIndex)) == 0:

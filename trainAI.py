@@ -73,13 +73,13 @@ def main():
     device = torch.device(f"cuda:{GPU_NUM}") if torch.cuda.is_available() else "cpu"
     torch.cuda.set_device(device)
     game = OthelloGameWrapper(boardSize= (6,6), blockPosType= "none")
-    ModelType = PQNetWrapper
+    ModelType = OthelloNetWrapper
     model = ModelType(game)
     trainBeginTask = 0
 
-    # model.load_checkpoint(folder='temp', filename='task0.tar')
+    # model.load_checkpoint(folder='temp', filename='PQNetWrapper_(6, 6)_none_checkpoint_24.pth.tar')
     # trainExamples = []
-    # with open(f'./temp/PQNetWrapper_(6, 6)_none_checkpoint_4.pth.tar.examples', "rb") as f:
+    # with open(f'./temp/PQNetWrapper_(6, 6)_none_checkpoint_23.pth.tar.examples', "rb") as f:
     #     trainExamplesHistory = Unpickler(f).load()
     #     for e in trainExamplesHistory:
     #         trainExamples.extend(e)
@@ -104,15 +104,18 @@ def main():
     for (task, param) in enumerate(tasks):
         if task < trainBeginTask:
             continue
-        model.prepareNextTask(task)
+        if isinstance(model, PQNetWrapper):
+            model.prepareNextTask(task)
+
+        model.setCurrTask(task)
         boardSize = param["boardSize"]
         blockPosType = param["blockPosType"]
         log.info(f'task {task}: {boardSize}, {blockPosType}')
-        model.setCurrTask(task)
         game = OthelloGameWrapper(boardSize= boardSize, blockPosType= blockPosType)
         coach = Coach(game, model, args)
         coach.learn()
         model.save_checkpoint(folder= './model', filename= f'{boardSize}_{blockPosType}_{type(model.nnet).__name__}.tar')
+
         if isinstance(model, PQNetWrapper):
             trainExamples = []
             with open(f'./temp/PQNetWrapper_{boardSize}_{blockPosType}_checkpoint_{args.numIters - 1}.pth.tar.examples', "rb") as f:
@@ -132,7 +135,6 @@ def main():
             for (name, info) in freezeResult[1]:
                 log.info(f"{name}: {info}")
             log.info(f'used capacity: {freezeResult[0]}')
-        model.prepareNextTask(task + 1)
 
 if __name__ == "__main__":
     main()

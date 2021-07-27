@@ -25,8 +25,12 @@ class OthelloNetWrapper(NeuralNet):
         self.nnet = OthelloFCNNet(game, args)
         self.boardSize = game.getBoardSize()
         self.actionSize = game.getActionSize()
+        self.currTask = 0
         if args.cuda:
             self.nnet.cuda()
+    
+    def setCurrTask(self, task):
+        self.currTask = task
 
     def train(self, examples):
         """

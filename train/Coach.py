@@ -174,13 +174,13 @@ class Coach():
         wins = [0,0]
         for _ in tqdm(range(int(iterCount / 2)), desc=f"Play with random(1), blockPosType: {blockPosType}"):
             board = Board(boardSize, blockPosType= blockPosType)
-            game = Game(board, (AIPlayer(boardSize, task= self.nnet.currTask, folderName= './temp/', modelName= 'curr.pth.tar'), RandomPlayer()))
+            game = Game(board, (AIPlayer(boardSize, agent= self.nnet), RandomPlayer()))
             winner = game.play(printBoard= False)
             if winner != None:
                 wins[winner] = wins[winner] + 1
         for _ in tqdm(range(int(iterCount / 2)), desc=f"Play with random(2), blockPosType: {blockPosType}"):
             board = Board(boardSize, blockPosType= blockPosType)
-            game = Game(board, (RandomPlayer(), AIPlayer(boardSize, task= self.nnet.currTask, folderName= './temp/', modelName= 'curr.pth.tar')))
+            game = Game(board, (RandomPlayer(), AIPlayer(boardSize, agent= self.nnet)))
             winner = game.play(printBoard= False)
             if winner != None:
                 wins[1 - winner] = wins[1 - winner] + 1

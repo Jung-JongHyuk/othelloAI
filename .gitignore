@@ -6,3 +6,4 @@ paper/
 presentation/
 *.pyc
 model/
+fisherTest.py
