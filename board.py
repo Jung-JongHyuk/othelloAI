@@ -21,6 +21,9 @@ class Board:
                 print("invalid blockPosType")
                 exit()
             self.setBlock(blockPos)
+        if self.mode not in ["default", "conway", "reverse"]:
+            print("invalid mode")
+            exit()
 
     def makeCrossBlockPos(self):
         blockPos = []
