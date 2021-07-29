@@ -6,12 +6,13 @@ sys.path.append('../')
 from board import Board
 
 class OthelloGameWrapper(GameModel):
-    def __init__(self, boardSize, blockPosType):
+    def __init__(self, boardSize, mode, blockPosType):
         self.boardSize = boardSize
         self.blockPosType = blockPosType
+        self.mode = mode
 
     def getInitBoard(self):
-        board = Board(self.boardSize, blockPosType= self.blockPosType)
+        board = Board(self.boardSize, mode= self.mode, blockPosType= self.blockPosType)
         return np.array(board.board)
     
     def getBoardSize(self):
@@ -80,7 +81,7 @@ class OthelloGameWrapper(GameModel):
         return board.tostring()
 
     def convertToBoardClass(self, board):
-        result = Board(self.boardSize, numOfBlock= 0)
+        result = Board(self.boardSize, mode= self.mode, blockPosType= self.blockPosType)
         result.board = board.tolist()
         return result
 

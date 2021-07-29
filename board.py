@@ -2,7 +2,7 @@ import random
 import sys
 
 class Board:
-    def __init__(self, boardSize, mode= "none", blockPosType= "none", numOfBlock= 0):
+    def __init__(self, boardSize, mode= "default", blockPosType= "none", numOfBlock= 0):
         (self.rowSize, self.colSize, self.blockPosType, self.numOfBlock, self.mode) = (boardSize[0], boardSize[1], blockPosType, numOfBlock, mode)
         (self.PLAYER_0, self.PLAYER_1, self.VOID, self.BLOCK) = (0, 1, 2, 3)
         self.board = [[self.VOID for col in range(self.colSize)] for row in range(self.rowSize)]

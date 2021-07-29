@@ -17,9 +17,9 @@ args = dotdict({
 })
 
 class AIPlayer(PlayerInterface):
-    def __init__(self, boardSize, agent):
+    def __init__(self, game, agent):
         super().__init__()
-        self.gameWrapper = OthelloGameWrapper(boardSize, blockPosType= 'none')
+        self.gameWrapper = game
         self.agent = agent
     
     def decide(self, board):

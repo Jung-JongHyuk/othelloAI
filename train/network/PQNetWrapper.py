@@ -113,12 +113,15 @@ class PQNetWrapper(NeuralNet):
     def prepareNextTask(self, nextTask):
         if nextTask != 0:
             self.nnet.valueFc.extendLayer(nextTask)
+            self.nnet.piFc.extendLayer(nextTask)
+            self.nnet.conv7.extendLayer(nextTask)
+
             self.nnet.convBn1.extendLayer(nextTask)
             self.nnet.convBn2.extendLayer(nextTask)
             self.nnet.convBn3.extendLayer(nextTask)
             self.nnet.convBn4.extendLayer(nextTask)
-            self.nnet.piFc.extendLayer(nextTask)
-            self.nnet.conv7.extendLayer(nextTask)
+            self.nnet.convBn5.extendLayer(nextTask)
+            self.nnet.convBn6.extendLayer(nextTask)
     
     def loss_pi(self, targets, outputs):
         return -torch.sum(targets * outputs) / targets.size()[0]

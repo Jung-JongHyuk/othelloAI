@@ -4,6 +4,7 @@ import sys
 from collections import deque
 from pickle import Pickler, Unpickler
 from random import shuffle
+from train.othelloGameWrapper import OthelloGameWrapper
 from train.network.PQFCNNet import PQFCNNet
 
 import torch
@@ -149,10 +150,8 @@ class Coach():
             log.info('PITTING AGAINST RANDOM AGENT')
             for i in range(currLearningTask + 1):
                 self.nnet.setCurrTask(i)
-                boardSize = tasks[i]["boardSize"]
-                blockPosType = tasks[i]["blockPosType"]
-                wins = self.playWithRandomAgent(boardSize, blockPosType, 100)
-                log.info(f'{boardSize}, {blockPosType} : NEW/RANDOM WINS : {wins[0]} / {wins[1]} ; DRAWS : {100 - wins[0] - wins[1]}')
+                wins = self.playWithRandomAgent(tasks[i], 100)
+                log.info(f'{tasks[i]} : NEW/RANDOM WINS : {wins[0]} / {wins[1]} ; DRAWS : {100 - wins[0] - wins[1]}')
             self.nnet.setCurrTask(currLearningTask)
 
             self.pnet.setCurrTask(currLearningTask)
@@ -170,24 +169,25 @@ class Coach():
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
             self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(iter))
     
-    def playWithRandomAgent(self, boardSize, blockPosType, iterCount):
+    def playWithRandomAgent(self, param, iterCount):
         wins = [0,0]
-        for _ in tqdm(range(int(iterCount / 2)), desc=f"Play with random(1), blockPosType: {blockPosType}"):
-            board = Board(boardSize, blockPosType= blockPosType)
-            game = Game(board, (AIPlayer(boardSize, agent= self.nnet), RandomPlayer()))
+        for _ in tqdm(range(int(iterCount / 2)), desc=f"Play with random(1), {param}"):
+            board = Board(**param)
+            game = Game(board, (AIPlayer(game= OthelloGameWrapper(**param), agent= self.nnet), RandomPlayer()))
             winner = game.play(printBoard= False)
             if winner != None:
                 wins[winner] = wins[winner] + 1
-        for _ in tqdm(range(int(iterCount / 2)), desc=f"Play with random(2), blockPosType: {blockPosType}"):
-            board = Board(boardSize, blockPosType= blockPosType)
-            game = Game(board, (RandomPlayer(), AIPlayer(boardSize, agent= self.nnet)))
+        for _ in tqdm(range(int(iterCount / 2)), desc=f"Play with random(2), {param}"):
+            board = Board(**param)
+            game = Game(board, (RandomPlayer(), AIPlayer(game= OthelloGameWrapper(**param), agent= self.nnet)))
             winner = game.play(printBoard= False)
             if winner != None:
                 wins[1 - winner] = wins[1 - winner] + 1
         return wins
 
     def getCheckpointFile(self, iteration):
-        return f'{type(self.nnet).__name__}_{self.game.boardSize}_{self.game.blockPosType}_checkpoint_{iteration}.pth.tar'
+        param = tasks[self.nnet.currTask]
+        return f'{type(self.nnet).__name__}_{param}_checkpoint_{iteration}.pth.tar'
 
     def saveTrainExamples(self, iteration):
         folder = self.args.checkpoint

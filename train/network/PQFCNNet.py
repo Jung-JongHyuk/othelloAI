@@ -25,6 +25,9 @@ class PQFCNNet(nn.Module):
         self.valueFc = ExtendableLayer(nn.Linear, args.num_channels, 1)
         self.piFc = ExtendableLayer(nn.Linear, int(args.num_channels / 4), 1)
 
+        self.convBn5 = ExtendableLayer(nn.BatchNorm2d, int(args.num_channels / 2))
+        self.convBn6 = ExtendableLayer(nn.BatchNorm2d, int(args.num_channels / 4))
+
         self.conv5 = ExtendableLayer(Conv2d_Q, args.num_channels, int(args.num_channels / 2), 3, stride=1, padding=1)
         self.conv6 = ExtendableLayer(Conv2d_Q, int(args.num_channels / 2), int(args.num_channels / 4), 3, stride=1, padding=1)
         self.conv7 = ExtendableLayer(nn.Conv2d, int(args.num_channels / 4), 1, 3, stride=1, padding=1)
@@ -41,8 +44,8 @@ class PQFCNNet(nn.Module):
         glbpooled = glbpooled.view(-1, self.args.num_channels) # batch_size x num_channels
         value = self.valueFc(glbpooled, task)
 
-        pi = self.conv5(s, task) # batch_size x num_channels / 2 x board_x x board_y
-        pi = self.conv6(pi, task) # batch_size x num_channels / 4 x board_x x board_y
+        pi = F.relu(self.convBn5(self.conv5(s, task), task)) # batch_size x num_channels / 2 x board_x x board_y
+        pi = F.relu(self.convBn6(self.conv6(pi, task), task)) # batch_size x num_channels / 4 x board_x x board_y
         piPos = self.conv7(pi, task) # batch_size x 1 x board_x x board_y
         piPos = piPos.view(s.shape[0], -1) # batch_size x board_x * board_y
         piNull = nn.AdaptiveAvgPool2d(1)(pi) # batch_size x num_channels / 4 x 1 x 1

@@ -1,3 +1,5 @@
+from train.othelloGameWrapper import OthelloGameWrapper
+from train.network.PQNetWrapper import PQNetWrapper
 from board import Board
 
 class Game:
@@ -57,20 +59,27 @@ if __name__ == "__main__":
     from player.AIPruningPlayer import AIPruningPlayer
     from player.aiPlayer import AIPlayer
     from player.dummyPlayer import DummyPlayer
+    import torch
+    from train.network.othelloNetWrapper import OthelloNetWrapper
 
-    boardSize = (6,6)
-
-    player0 = AIPlayer(boardSize, task= 0, folderName= './temp', modelName='best.pth_copy.tar')
+    GPU_NUM = 1
+    device = torch.device(f"cuda:{GPU_NUM}") if torch.cuda.is_available() else "cpu"
+    torch.cuda.set_device(device)
+    boardSize = (8,8)
+    ModelType = OthelloNetWrapper
+    model = ModelType(OthelloGameWrapper(boardSize, "none"))
+    model.setCurrTask(0)
+    model.load_checkpoint(folder= "./model", filename= "(6, 6)_none_OthelloFCNNet.tar")
+    player0 = AIPlayer(boardSize, model)
     # player1 = AIPruningPlayer((6,6), modelName='best.pth.tar', seachDepth=3)
     # player1 = AIPlayer(boardSize, folderName= './model', modelName='QNetWrapper_(6, 6)_none_checkpoint_15.pth.tar')
     player1 = RandomPlayer()
 
     wins = [0,0]
     for i in range(100):
-        board = Board(boardSize)
-        game = Game(board, (player1, player0))
+        board = Board(boardSize, mode= "conway")
+        game = Game(board, (player0, player1))
         winner = game.play(printBoard= False)
-        print(winner)
         if winner != None:
             wins[winner] = wins[winner] + 1
         print(wins)
