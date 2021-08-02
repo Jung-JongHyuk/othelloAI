@@ -66,7 +66,7 @@ def main():
         model.prepareNextTask(task)
         model.setCurrTask(task)
         log.info(f'task {task}: {param}')
-        game = OthelloGameWrapper(**param)
+        game = OthelloGameWrapper(param)
         coach = Coach(game, model, args)
         coach.learn()
         model.save_checkpoint(folder= './model', filename= f'{param}_{type(model.nnet).__name__}.tar')

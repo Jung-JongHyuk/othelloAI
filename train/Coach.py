@@ -173,13 +173,13 @@ class Coach():
         wins = [0,0]
         for _ in tqdm(range(int(iterCount / 2)), desc=f"Play with random(1), {param}"):
             board = Board(**param)
-            game = Game(board, (AIPlayer(game= OthelloGameWrapper(**param), agent= self.nnet), RandomPlayer()))
+            game = Game(board, (AIPlayer(game= OthelloGameWrapper(param), agent= self.nnet), RandomPlayer()))
             winner = game.play(printBoard= False)
             if winner != None:
                 wins[winner] = wins[winner] + 1
         for _ in tqdm(range(int(iterCount / 2)), desc=f"Play with random(2), {param}"):
             board = Board(**param)
-            game = Game(board, (RandomPlayer(), AIPlayer(game= OthelloGameWrapper(**param), agent= self.nnet)))
+            game = Game(board, (RandomPlayer(), AIPlayer(game= OthelloGameWrapper(param), agent= self.nnet)))
             winner = game.play(printBoard= False)
             if winner != None:
                 wins[1 - winner] = wins[1 - winner] + 1

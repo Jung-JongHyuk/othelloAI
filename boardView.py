@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QGridLayout
 class BoardView(QWidget):
     def __init__(self, boardSize):
         super().__init__()
-        self.icons = ["🔵", "🟠", "", "❌"]
+        self.icons = ["🔵", "🟠", "", "❌", "⚫️"]
         self.placeableIcons = ["🔹", "🔸"]
         self.boardSize = boardSize
         self.grids = []

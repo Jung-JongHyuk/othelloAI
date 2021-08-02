@@ -2,9 +2,9 @@ import random
 import sys
 
 class Board:
-    def __init__(self, boardSize, mode= "default", blockPosType= "none", numOfBlock= 0):
+    def __init__(self, boardSize, mode= "default", blockPosType= "none", numOfBlock= 0, customBlockPos= []):
         (self.rowSize, self.colSize, self.blockPosType, self.numOfBlock, self.mode) = (boardSize[0], boardSize[1], blockPosType, numOfBlock, mode)
-        (self.PLAYER_0, self.PLAYER_1, self.VOID, self.BLOCK) = (0, 1, 2, 3)
+        (self.PLAYER_0, self.PLAYER_1, self.VOID, self.BLOCK, self.NEUTRAL) = (0, 1, 2, 3, 4)
         self.board = [[self.VOID for col in range(self.colSize)] for row in range(self.rowSize)]
         self.placeInitialPiece()
         if blockPosType == "random":
@@ -17,11 +17,14 @@ class Board:
                 blockPos = self.makeCrossBlockPos()
             elif blockPosType == "octagon":
                 blockPos = self.makeOctagonBlockPos()
+            elif blockPosType == "custom":
+                blockPos = self.makeSymmetricBlockPos(customBlockPos)
+
             elif blockPosType != "none":
                 print("invalid blockPosType")
                 exit()
             self.setBlock(blockPos)
-        if self.mode not in ["default", "conway", "reverse"]:
+        if self.mode not in ["default", "conway", "desdemona"]:
             print("invalid mode")
             exit()
 
@@ -58,6 +61,15 @@ class Board:
             blockPos.append((int(self.rowSize / 2) + i, i))
             blockPos.append((self.rowSize - i - 1, int(self.colSize / 2 + i)))
             blockPos.append((int(self.rowSize / 2) - i - 1, self.colSize - i - 1))
+        return blockPos
+    
+    def makeSymmetricBlockPos(self, customBlockPos):
+        blockPos = []
+        for pos in customBlockPos:
+            blockPos.append(pos)
+            blockPos.append((pos[0], self.colSize - pos[1] - 1))
+            blockPos.append((self.rowSize - pos[0] - 1, pos[1]))
+            blockPos.append((self.rowSize - pos[0] - 1, self.colSize - pos[1] - 1))
         return blockPos
 
     def placeInitialPiece(self):
@@ -118,6 +130,8 @@ class Board:
         while not self.isIndexOutOfRange(currentRowIndex, currentColIndex):
             if self.board[currentRowIndex][currentColIndex] == self.counterPlayerIndex(playerIndex):
                 numOfCounterPlayerPieceBetweenWall = numOfCounterPlayerPieceBetweenWall + 1
+            elif self.mode == "desdemona" and self.board[currentRowIndex][currentColIndex] == self.NEUTRAL:
+                numOfCounterPlayerPieceBetweenWall = numOfCounterPlayerPieceBetweenWall + 1
             elif self.board[currentRowIndex][currentColIndex] == playerIndex:
                 if numOfCounterPlayerPieceBetweenWall > 0:
                     return (currentRowIndex, currentColIndex)
@@ -141,7 +155,10 @@ class Board:
             if wallCoordinates[i] != None:
                 (currentRowIndex, currentColIndex) = (rowIndex + rowMoveDirections[i], colIndex + colMoveDirections[i])
                 while (currentRowIndex, currentColIndex) != wallCoordinates[i]:
-                    self.board[currentRowIndex][currentColIndex] = playerIndex
+                    if self.mode == "desdemona":
+                        self.board[currentRowIndex][currentColIndex] = playerIndex if self.board[currentRowIndex][currentColIndex] == self.NEUTRAL else self.NEUTRAL
+                    else:
+                        self.board[currentRowIndex][currentColIndex] = playerIndex
                     (currentRowIndex, currentColIndex) = (currentRowIndex + rowMoveDirections[i], currentColIndex + colMoveDirections[i])
         self.board[rowIndex][colIndex] = playerIndex
 

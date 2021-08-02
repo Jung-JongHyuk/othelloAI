@@ -1,3 +1,4 @@
+from random import shuffle
 from train.othelloGameWrapper import OthelloGameWrapper
 from train.network.PQNetWrapper import PQNetWrapper
 from board import Board
@@ -41,7 +42,6 @@ class Game:
             self.isPrevPlayerSkipped = False
             self.currPlayerIndex = self.getCounterPlayerIndex(self.currPlayerIndex)
             if len(self.board.getPlaceableCoordinates(self.currPlayerIndex)) == 0:
-                # print(self.currPlayerIndex, "skipped")
                 self.isPrevPlayerSkipped = True
                 self.currPlayerIndex = self.getCounterPlayerIndex(self.currPlayerIndex)
                 if len(self.board.getPlaceableCoordinates(self.currPlayerIndex)) == 0:
@@ -64,28 +64,45 @@ if __name__ == "__main__":
     from player.dummyPlayer import DummyPlayer
     import torch
     from train.network.othelloNetWrapper import OthelloNetWrapper
+    from trainTasks import tasks
 
-    GPU_NUM = 1
-    device = torch.device(f"cuda:{GPU_NUM}") if torch.cuda.is_available() else "cpu"
-    torch.cuda.set_device(device)
-    boardSize = (8,8)
+    # GPU_NUM = 1
+    # device = torch.device(f"cuda:{GPU_NUM}") if torch.cuda.is_available() else "cpu"
+    # torch.cuda.set_device(device)
+    taskIdx = 3
+    # ModelType = OthelloNetWrapper
     ModelType = OthelloNetWrapper
-    model = ModelType(OthelloGameWrapper(boardSize, "none"))
+    model = ModelType(OthelloGameWrapper(tasks[taskIdx]))
+    model.load_checkpoint(folder= "./model", filename= "(8, 8)_cross_OthelloFCNNet.tar")
+    # model.load_checkpoint(folder= "./model", filename= "{'boardSize': (8, 8), 'mode': 'default', 'blockPosType': 'cross'}_PQFCNNet_blip.tar")
+    # model.prepareNextTask(3)
     model.setCurrTask(0)
-    model.load_checkpoint(folder= "./model", filename= "(6, 6)_none_OthelloFCNNet.tar")
-    player0 = AIPlayer(boardSize, model)
-    # player1 = AIPruningPlayer((6,6), modelName='best.pth.tar', seachDepth=3)
-    # player1 = AIPlayer(boardSize, folderName= './model', modelName='QNetWrapper_(6, 6)_none_checkpoint_15.pth.tar')
+    player0 = AIPlayer(OthelloGameWrapper(tasks[taskIdx]), model)
     player1 = RandomPlayer()
+
+    import random
+    pos = [(row,col) for col in range(3) for row in range(3)]
+    # pos = [(0,1), (1,2), (2,2)]
+    # shuffle(pos)
+    # blocks = []
+    # for i in range(3):
+    #     blocks.append(pos[i])
+    #     blocks.append((pos[i][0], 7 - pos[i][1]))
+    #     blocks.append((7 - pos[i][0], pos[i][1]))
+    #     blocks.append((7 - pos[i][0], 7 - pos[i][1]))
+    # board = Board((8,8))
+    # board.setBlock(blocks)
+    # board.printBoard()
 
     wins = [0,0]
     for i in range(100):
-        board = Board(boardSize, mode= "default", blockPosType= "none")
+        board = Board(**tasks[3])
+        # board.setBlock(blocks)
         game = Game(board, (player0, player1))
         winner = game.play(printBoard= False)
         if winner != None:
             wins[winner] = wins[winner] + 1
-    print(wins)
+        print(wins)
 
             
 
