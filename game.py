@@ -54,6 +54,9 @@ class Game:
         return self.players[self.currPlayerIndex]
 
 if __name__ == "__main__":
+    from train.network.othelloNetWrapper import OthelloNetWrapper
+    from train.network.PQNetWrapper import PQNetWrapper
+    from train.othelloGameWrapper import OthelloGameWrapper
     from player.randomPlayer import RandomPlayer
     from player.alphaBetaPruningPlayer import AlphaBetaPruningPlayer
     from player.AIPruningPlayer import AIPruningPlayer
@@ -77,12 +80,12 @@ if __name__ == "__main__":
 
     wins = [0,0]
     for i in range(100):
-        board = Board(boardSize, mode= "conway")
+        board = Board(boardSize, mode= "default", blockPosType= "none")
         game = Game(board, (player0, player1))
         winner = game.play(printBoard= False)
         if winner != None:
             wins[winner] = wins[winner] + 1
-        print(wins)
+    print(wins)
 
             
 
