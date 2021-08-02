@@ -8,6 +8,7 @@ from tqdm import tqdm
 from .NeuralNet import NeuralNet
 from .othello6x6VGGNet import Othello6x6VGGNet
 from .othelloFCNNet import OthelloFCNNet
+from .ExtendableLayer import ExtendableLayer
 sys.path.append('../')
 from train.utils import *
 
@@ -31,6 +32,12 @@ class OthelloNetWrapper(NeuralNet):
     
     def setCurrTask(self, task):
         self.currTask = task
+    
+    def prepareNextTask(self, nextTask):
+        if nextTask != 0:
+            self.nnet.valueFc.extendLayer(nextTask)
+            self.nnet.piFc.extendLayer(nextTask)
+            self.nnet.conv7.extendLayer(nextTask)
 
     def train(self, examples):
         """
@@ -59,7 +66,7 @@ class OthelloNetWrapper(NeuralNet):
                     boards, target_pis, target_vs = boards.contiguous().cuda(), target_pis.contiguous().cuda(), target_vs.contiguous().cuda()
 
                 # compute output
-                out_pi, out_v = self.nnet(boards)
+                out_pi, out_v = self.nnet(boards, self.currTask)
                 l_pi = self.loss_pi(target_pis, out_pi)
                 l_v = self.loss_v(target_vs, out_v)
                 total_loss = l_pi + l_v
@@ -84,7 +91,7 @@ class OthelloNetWrapper(NeuralNet):
         board = board.view(1, board.shape[0], board.shape[1])
         self.nnet.eval()
         with torch.no_grad():
-            pi, v = self.nnet(board)
+            pi, v = self.nnet(board, self.currTask)
 
         # print('PREDICTION TIME TAKEN : {0:03f}'.format(time.time()-start))
         return torch.exp(pi).data.cpu().numpy()[0], v.data.cpu().numpy()[0]
@@ -105,6 +112,7 @@ class OthelloNetWrapper(NeuralNet):
         torch.save({
             'state_dict': self.nnet.state_dict(),
         }, filepath)
+        print(f"saved in {filepath}")
 
     def load_checkpoint(self, folder='checkpoint', filename='checkpoint.pth.tar'):
         # https://github.com/pytorch/examples/blob/master/imagenet/main.py#L98
@@ -113,4 +121,8 @@ class OthelloNetWrapper(NeuralNet):
             raise ("No model in path {}".format(filepath))
         map_location = None if args.cuda else 'cpu'
         checkpoint = torch.load(filepath, map_location=map_location)
+        self.nnet.load_state_dict(checkpoint['state_dict'], strict= False)
+        for m in self.nnet.modules():
+            if isinstance(m, ExtendableLayer):
+                m.fitLayerSize()
         self.nnet.load_state_dict(checkpoint['state_dict'])

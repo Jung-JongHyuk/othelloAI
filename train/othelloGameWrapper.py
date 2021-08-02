@@ -74,6 +74,7 @@ class OthelloGameWrapper(GameModel):
                 if j:
                     newBoard = np.fliplr(newBoard)
                     newPiOfBoard = np.fliplr(newPiOfBoard)
+                # if newBoard.shape == self.boardSize:
                 result += [(newBoard, list(newPiOfBoard.ravel()) + [pi[-1]])]
         return result
 

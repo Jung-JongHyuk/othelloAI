@@ -53,15 +53,17 @@ def main():
     torch.cuda.set_device(device)
     trainBeginTask = 0
     game = OthelloGameWrapper(**tasks[trainBeginTask])
-    ModelType = PQNetWrapper
+    ModelType = OthelloNetWrapper
     model = ModelType(game)
+    if trainBeginTask != 0:
+        fileName = f"{tasks[trainBeginTask - 1]}_{type(model.nnet).__name__}_blip.tar"
+        model.load_checkpoint(folder= './model', filename= fileName)
 
     for (task, param) in enumerate(tasks):
         if task < trainBeginTask:
             continue
-        elif isinstance(model, PQNetWrapper):
-            model.prepareNextTask(task)
-
+        
+        model.prepareNextTask(task)
         model.setCurrTask(task)
         log.info(f'task {task}: {param}')
         game = OthelloGameWrapper(**param)
@@ -88,7 +90,7 @@ def main():
             for (name, info) in freezeResult[1]:
                 log.info(f"{name}: {info}")
             log.info(f'used capacity: {freezeResult[0]}')
-        model.save_checkpoint(folder= './model', filename= f'{param}_{type(model.nnet).__name__}_blip.tar')
+            model.save_checkpoint(folder= './model', filename= f'{param}_{type(model.nnet).__name__}_blip.tar')
 
 if __name__ == "__main__":
     main()
