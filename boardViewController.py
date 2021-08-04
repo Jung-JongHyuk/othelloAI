@@ -15,9 +15,13 @@ class BoardViewController:
         self.view = BoardView(boardSize)
         self.board = Board(boardSize, mode= "desdemona", blockPosType= "octagon", numOfBlock= numOfBlank)
         self.prevBoard = copy.deepcopy(self.board)
-        self.Players = (DummyPlayer(), DummyPlayer())
+        self.Players = (DummyPlayer(), RandomPlayer())
         self.game = Game(self.board, self.Players)
         self.lastPlacedPos = []
+        self.view.setPlayerName(0, f"{type(self.Players[0]).__name__} {self.view.icons[0]}")
+        self.view.setPlayerName(1, f"{self.view.icons[1]} {type(self.Players[1]).__name__}")
+        with open("./boardView.qss", 'r') as qss:
+            self.view.setStyleSheet(qss.read())
         self.proceedGame()
         self.makeBoardView()
         self.updateView()
@@ -65,3 +69,9 @@ class BoardViewController:
             self.view.setGridIsPlaced(pos, True)
 
         self.prevBoard = copy.deepcopy(self.board)
+        boardStatus = self.board.getBoardStatus()
+        self.view.setPlayerScore(0, boardStatus[0])
+        self.view.setPlayerScore(1, boardStatus[1])
+
+        if self.game.isGameFinished:
+            self.view.popAlert("Game ended.") 
