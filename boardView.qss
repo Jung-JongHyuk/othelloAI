@@ -1,11 +1,11 @@
 QPushButton {
     background-color: rgba(0,100,0,0.1); 
-    font-size: 50px;
+    font-size: 40px;
 }
 
 QPushButton#changed {
     background-color: rgba(0,100,0,0.3); 
-    font-size: 50px;
+    font-size: 40px;
 }
 
 QPushButton#placed {
@@ -14,7 +14,6 @@ QPushButton#placed {
 }
 
 QLabel {
-    background-color: rgba(70,170,230,0.3);
     qproperty-alignment: AlignCenter; 
     font-size: 30px;
 }

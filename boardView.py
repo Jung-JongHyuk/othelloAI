@@ -5,13 +5,15 @@ from PyQt5.QtWidgets import QApplication, QHBoxLayout, QLabel, QMessageBox, QVBo
 class BoardView(QWidget):
     def __init__(self, boardSize):
         super().__init__()
-        self.icons = ["🔵", "🟠", "", "❌", "⚫️"]
+        self.icons = ["🔵", "🟠", "", "🪨", "⚫️"]
         self.placeableIcons = ["🔹", "🔸"]
         self.boardSize = boardSize
         self.grids = None
+        self.scoreBoardToGridRatio = 10
         self.playerNameLabels = [QLabel("1", self), QLabel("2", self)]
         self.playerScoreLabels = [QLabel("3", self), QLabel("4", self)]
         self.initView()
+        self.show()
 
     def initView(self):
         (rowSize, colSize) = self.boardSize
@@ -23,7 +25,12 @@ class BoardView(QWidget):
                 self.grids[row][col].setMaximumHeight(500)
 
         #set layout
+        gridSize = self.getProperGridSize()
         statusLayout = QGridLayout()
+        for nameLabels in self.playerNameLabels:
+            nameLabels.setFixedWidth(gridSize * 3)
+        for scoreLabels in self.playerScoreLabels:
+            scoreLabels.setFixedWidth(gridSize)
         statusLayout.addWidget(self.playerNameLabels[0], 0, 0)
         statusLayout.setColumnStretch(0, colSize / 2 - 1)
         statusLayout.addWidget(self.playerScoreLabels[0], 0, 1)
@@ -36,16 +43,28 @@ class BoardView(QWidget):
         gridLayout = QGridLayout()
         for row in range(rowSize):
             for col in range(colSize):
+                self.grids[row][col].setFixedHeight(gridSize)
+                self.grids[row][col].setFixedWidth(gridSize)
                 gridLayout.addWidget(self.grids[row][col], row + 1, col)
         
         mainLayout = QGridLayout()
         mainLayout.addLayout(statusLayout, 0, 0)
         mainLayout.setRowStretch(0, 1)
         mainLayout.addLayout(gridLayout, 1, 0)
-        mainLayout.setRowStretch(1, 10)
+        mainLayout.setRowStretch(1, self.scoreBoardToGridRatio)
         self.setLayout(mainLayout)
-        self.setGeometry(0, 0, 1000, 1000)
-        self.show()
+        properScreenSize = self.getProperGridSize()
+        print(properScreenSize)
+        # self.setFixedSize(properScreenSize[1], properScreenSize[0])
+    
+    def getProperGridSize(self):
+        (rowSize, colSize) = self.boardSize
+        screenSize = QApplication.primaryScreen().size()
+        (screenHeight, screenWidth) = (screenSize.height() * 0.8, screenSize.width() * 0.8)
+        if self.scoreBoardToGridRatio * screenHeight / (1 + self.scoreBoardToGridRatio) < screenWidth:
+            return self.scoreBoardToGridRatio * screenHeight / ((1 + self.scoreBoardToGridRatio) * colSize)
+        else:
+            return screenWidth / colSize
     
     def setPlayerName(self, playerIdx, name):
         self.playerNameLabels[playerIdx].setText(str(name))

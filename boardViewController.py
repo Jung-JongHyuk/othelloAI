@@ -10,10 +10,10 @@ from player.aiPlayer import AIPlayer
 import copy
 
 class BoardViewController:
-    def __init__(self, boardSize, numOfBlank):
-        self.boardSize = boardSize
-        self.view = BoardView(boardSize)
-        self.board = Board(boardSize, mode= "desdemona", blockPosType= "octagon", numOfBlock= numOfBlank)
+    def __init__(self, player0, player1, boardSetting):
+        self.boardSize = boardSetting["boardSize"]
+        self.view = BoardView(self.boardSize)
+        self.board = Board(**boardSetting)
         self.prevBoard = copy.deepcopy(self.board)
         self.Players = (DummyPlayer(), RandomPlayer())
         self.game = Game(self.board, self.Players)
@@ -23,10 +23,10 @@ class BoardViewController:
         with open("./boardView.qss", 'r') as qss:
             self.view.setStyleSheet(qss.read())
         self.proceedGame()
-        self.makeBoardView()
+        self.connectEventHandler()
         self.updateView()
     
-    def makeBoardView(self):
+    def connectEventHandler(self):
         (rowSize, colSize) = self.boardSize
         for row in range(rowSize):
             for col in range(colSize):
@@ -37,6 +37,7 @@ class BoardViewController:
         self.prevBoard = copy.deepcopy(self.board)
         self.proceedGame()
         self.updateView()
+        self.prevBoard = copy.deepcopy(self.board)
     
     def proceedGame(self):
         self.lastPlacedPos = []
@@ -48,16 +49,19 @@ class BoardViewController:
     
     def updateView(self):
         (rowSize, colSize) = self.boardSize
+        # update piece
         for row in range(rowSize):
             for col in range(colSize):
                 self.view.setGridText((row,col), self.view.icons[self.board.board[row][col]])
                 self.view.setGridClickEnabled((row,col), False)
 
+        # update placeable pos and enable click
         placeableCoordinates = self.board.getPlaceableCoordinates(self.game.currPlayerIndex)
         for coordinate in placeableCoordinates:
             self.view.setGridText(coordinate, self.view.placeableIcons[self.game.currPlayerIndex])
             self.view.setGridClickEnabled(coordinate, True)
 
+        # update changed and placed pos
         for row in range(rowSize):
             for col in range(colSize):
                 if self.prevBoard.board[row][col] != self.board.board[row][col]:
@@ -68,10 +72,11 @@ class BoardViewController:
         for pos in self.lastPlacedPos:
             self.view.setGridIsPlaced(pos, True)
 
-        self.prevBoard = copy.deepcopy(self.board)
+        # update score board
         boardStatus = self.board.getBoardStatus()
         self.view.setPlayerScore(0, boardStatus[0])
         self.view.setPlayerScore(1, boardStatus[1])
 
+        # pop alert if game is ended
         if self.game.isGameFinished:
             self.view.popAlert("Game ended.") 

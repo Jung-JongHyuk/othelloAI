@@ -66,11 +66,7 @@ if __name__ == "__main__":
     from train.network.othelloNetWrapper import OthelloNetWrapper
     from trainTasks import tasks
 
-    # GPU_NUM = 1
-    # device = torch.device(f"cuda:{GPU_NUM}") if torch.cuda.is_available() else "cpu"
-    # torch.cuda.set_device(device)
-    taskIdx = 3
-    # ModelType = OthelloNetWrapper
+    taskIdx = 4
     ModelType = OthelloNetWrapper
     model = ModelType(OthelloGameWrapper(tasks[taskIdx]))
     model.load_checkpoint(folder= "./model", filename= "(8, 8)_cross_OthelloFCNNet.tar")
@@ -83,21 +79,21 @@ if __name__ == "__main__":
     import random
     pos = [(row,col) for col in range(3) for row in range(3)]
     # pos = [(0,1), (1,2), (2,2)]
-    # shuffle(pos)
-    # blocks = []
-    # for i in range(3):
-    #     blocks.append(pos[i])
-    #     blocks.append((pos[i][0], 7 - pos[i][1]))
-    #     blocks.append((7 - pos[i][0], pos[i][1]))
-    #     blocks.append((7 - pos[i][0], 7 - pos[i][1]))
-    # board = Board((8,8))
-    # board.setBlock(blocks)
-    # board.printBoard()
+    shuffle(pos)
+    blocks = []
+    for i in range(3):
+        blocks.append(pos[i])
+        blocks.append((pos[i][0], 7 - pos[i][1]))
+        blocks.append((7 - pos[i][0], pos[i][1]))
+        blocks.append((7 - pos[i][0], 7 - pos[i][1]))
+    board = Board((8,8))
+    board.setBlock(blocks)
+    board.printBoard()
 
     wins = [0,0]
     for i in range(100):
-        board = Board(**tasks[3])
-        # board.setBlock(blocks)
+        board = Board((8,8), mode="conway")
+        board.setBlock(blocks)
         game = Game(board, (player0, player1))
         winner = game.play(printBoard= False)
         if winner != None:
