@@ -6,4 +6,6 @@ paper/
 presentation/
 *.pyc
 model/
+model_512/
+model_256/
 fisherTest.py

@@ -6,6 +6,7 @@ import numpy as np
 import time
 import sys
 import os
+import math
 from tqdm import tqdm
 from .NeuralNet import NeuralNet
 from .QVGGNet import QVGGNet
@@ -14,6 +15,7 @@ from .quantizedLayer import Linear_Q, Conv2d_Q
 from .PQFCNNet import PQFCNNet
 sys.path.append('../')
 from train.utils import *
+from train.blip_utils import *
 
 args = dotdict({
     'lr': 0.001,
@@ -21,7 +23,7 @@ args = dotdict({
     'epochs': 10,
     'batch_size': 64,
     'cuda': torch.cuda.is_available(),
-    'num_channels': 512,
+    'num_channels': 256,
 })
 
 class PQNetWrapper(NeuralNet):
@@ -81,15 +83,6 @@ class PQNetWrapper(NeuralNet):
                 optimizer.zero_grad()
                 total_loss.backward()
                 optimizer.step()
-
-                # for m in self.nnet.modules():
-                #     if isinstance(m, Linear_Q) or isinstance(m, Conv2d_Q):
-                #         print(m._get_name())
-                #         print(m.weight.data)
-                #         print(m.bias.data)
-                #         print(m.weight.data - m.prev_weight.data)
-                #         print(m.bias.data - m.prev_bias.data)
-                #         print("")
                 
                 for m in self.nnet.modules():
                     if isinstance(m, Linear_Q) or isinstance(m, Conv2d_Q):
@@ -110,18 +103,34 @@ class PQNetWrapper(NeuralNet):
         # print('PREDICTION TIME TAKEN : {0:03f}'.format(time.time()-start))
         return torch.exp(pi).data.cpu().numpy()[0], v.data.cpu().numpy()[0]
     
-    def prepareNextTask(self, nextTask):
+    def prepareNextTask(self, nextTask, expandThreshold):
         if nextTask != 0:
-            self.nnet.valueFc.extendLayer(nextTask)
-            self.nnet.piFc.extendLayer(nextTask)
-            self.nnet.conv7.extendLayer(nextTask)
-
-            self.nnet.convBn1.extendLayer(nextTask)
-            self.nnet.convBn2.extendLayer(nextTask)
-            self.nnet.convBn3.extendLayer(nextTask)
-            self.nnet.convBn4.extendLayer(nextTask)
-            self.nnet.convBn5.extendLayer(nextTask)
-            self.nnet.convBn6.extendLayer(nextTask)
+            for m in self.nnet.modules():
+                if isinstance(m, ExtendableLayer):
+                    if isinstance(m.layers[0], Linear_Q) or isinstance(m.layers[0], Conv2d_Q):
+                        layerStatus = used_capacity(m.layers[-1], 20)
+                        print(layerStatus[0], end= " ")
+                        if layerStatus[0] > expandThreshold:
+                            m.extendLayer(nextTask)
+                            print("extended.")
+                        else:
+                            print("not extended.")
+                    else:
+                        m.extendLayer(nextTask)
+    
+    def applyBlip(self, device, trainExamples):
+        estimate_fisher(self.currTask, device, self, trainExamples)
+        for m in self.nnet.modules():
+            if isinstance(m, ExtendableLayer):
+                if isinstance(m.layers[0], Linear_Q) or isinstance(m.layers[0], Conv2d_Q):
+                    layerIdx = len(m.layers) - 1
+                    taskCountOfLayer = self.currTask - m.insertedTaskPoint.tolist()[layerIdx]
+                    # update bits according to information gain
+                    m.layers[-1].update_bits(task= taskCountOfLayer , C=0.5/math.log(2))
+                    # do quantization
+                    m.layers[-1].sync_weight()
+                    # update Fisher in the buffer
+                    m.layers[-1].update_fisher(task= taskCountOfLayer)
     
     def loss_pi(self, targets, outputs):
         return -torch.sum(targets * outputs) / targets.size()[0]

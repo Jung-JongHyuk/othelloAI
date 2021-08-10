@@ -22,12 +22,14 @@ from player.randomPlayer import RandomPlayer
 from player.aiPlayer import AIPlayer
 from trainTasks import tasks
 
+logFilePostfix = "PQFCN"
+
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 while log.hasHandlers():
     log.removeHandler(log.handlers[0])
 streamHandler = logging.StreamHandler()
-fileHandler = logging.FileHandler('trainLog.log', 'w')
+fileHandler = logging.FileHandler(f'trainLog_{logFilePostfix}.log', 'w')
 log.propagate = False
 log.addHandler(streamHandler)
 log.addHandler(fileHandler)
@@ -46,6 +48,10 @@ class Coach():
         self.mcts = MCTS(self.game, self.nnet, self.args)
         self.trainExamplesHistory = []  # history of examples from args.numItersForTrainExamplesHistory latest iterations
         self.skipFirstSelfPlay = False  # can be overriden in loadTrainExamples()
+
+        if args.load_model:
+            self.loadTrainExamples()
+            self.nnet.load_checkpoint(args.load_folder_file[0], args.load_folder_file[1])
 
     def executeEpisode(self):
         """
@@ -95,7 +101,9 @@ class Coach():
         only if it wins >= updateThreshold fraction of games.
         """
 
-        for iter in range(1, self.args.numIters + 1):
+        startIter = self.args.resume_iter if self.args.load_model else 1
+
+        for iter in range(startIter, self.args.numIters + 1):
             # bookkeeping
             log.info(f'Starting Iter #{iter} ...')
             # examples of the iteration
@@ -115,7 +123,7 @@ class Coach():
                 self.trainExamplesHistory.pop(0)
             # backup history to a file
             # NB! the examples were collected using the model from the previous iteration, so (i-1)  
-            self.saveTrainExamples(iter - 1)
+            # self.saveTrainExamples(iter - 1)
 
             # shuffle examples before training
             trainExamples = []
@@ -124,8 +132,8 @@ class Coach():
             shuffle(trainExamples)
 
             # training new network, keeping a copy of the old one
-            self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
-            self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
+            self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=f'temp_{type(self.nnet.nnet).__name__}.pth.tar')
+            self.pnet.load_checkpoint(folder=self.args.checkpoint, filename=f'temp_{type(self.nnet.nnet).__name__}.pth.tar')
 
             pmcts = MCTS(self.game, self.pnet, self.args)
             # self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='curr.pth.tar')
@@ -145,7 +153,7 @@ class Coach():
 
             nmcts = MCTS(self.game, self.nnet, self.args)
 
-            self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='curr.pth.tar')
+            self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=f'curr_{type(self.nnet.nnet).__name__}.pth.tar')
             currLearningTask = self.nnet.currTask
             log.info('PITTING AGAINST RANDOM AGENT')
             for i in range(currLearningTask + 1):
@@ -163,11 +171,12 @@ class Coach():
             log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
             if pwins + nwins == 0 or float(nwins) / (pwins + nwins) < self.args.updateThreshold:
                 log.info('REJECTING NEW MODEL')
-                self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
+                self.nnet.load_checkpoint(folder=self.args.checkpoint, filename=f'temp_{type(self.nnet.nnet).__name__}.pth.tar')
             else:
                 log.info('ACCEPTING NEW MODEL')
-                self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
+                self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=f'best_{type(self.nnet.nnet).__name__}.pth.tar')
             self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(iter))
+        return trainExamples
     
     def playWithRandomAgent(self, param, iterCount):
         wins = [0,0]
@@ -199,8 +208,9 @@ class Coach():
         f.closed
 
     def loadTrainExamples(self):
-        modelFile = os.path.join(self.args.load_folder_file[0], self.args.load_folder_file[1])
-        examplesFile = modelFile + ".examples"
+        # modelFile = os.path.join(self.args.load_folder_file[0], self.args.load_folder_file[1])
+        # examplesFile = modelFile + ".examples"
+        examplesFile = os.path.join(self.args.load_folder_file[0], self.getCheckpointFile(self.args.resume_iter - 1) + ".examples")
         if not os.path.isfile(examplesFile):
             log.warning(f'File "{examplesFile}" with trainExamples not found!')
             r = input("Continue? [y|n]")

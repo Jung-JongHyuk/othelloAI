@@ -3,7 +3,7 @@ import math
 from pickle import Pickler, Unpickler
 import gc
 
-from train.Coach import Coach
+from train.Coach import Coach, logFilePostfix
 from train.othelloGameWrapper import OthelloGameWrapper
 from train.network.othelloNetWrapper import OthelloNetWrapper
 from train.network.QNetWrapper import QNetWrapper
@@ -25,7 +25,7 @@ log.setLevel(logging.DEBUG)
 while log.hasHandlers():
     log.removeHandler(log.handlers[0])
 streamHandler = logging.StreamHandler()
-fileHandler = logging.FileHandler('fisherLog.log', 'w')
+fileHandler = logging.FileHandler(f'fisherLog_{logFilePostfix}.log', 'w')
 log.propagate = False
 log.addHandler(streamHandler)
 log.addHandler(fileHandler)
@@ -42,50 +42,42 @@ args = dotdict({
 
     'checkpoint': './temp/',
     'load_model': False,
-    'load_folder_file': ('/models/','best.pth.tar'),
-    'numItersForTrainExamplesHistory': 20,
-
+    'load_folder_file': ('./temp/','best_PQFCNNet.pth.tar'),
+    'resume_iter': 1,
+    'numItersForTrainExamplesHistory': 20
 })
 
 def main():
-    GPU_NUM = 1
+    GPU_NUM = 2
+    trainBeginTask = 2
+    ModelType = PQNetWrapper
+    expandThreshold = 0.7
+
     device = torch.device(f"cuda:{GPU_NUM}") if torch.cuda.is_available() else "cpu"
     torch.cuda.set_device(device)
-    trainBeginTask = 0
-    game = OthelloGameWrapper(**tasks[trainBeginTask])
-    ModelType = OthelloNetWrapper
+    game = OthelloGameWrapper(tasks[trainBeginTask])
     model = ModelType(game)
     if trainBeginTask != 0:
-        fileName = f"{tasks[trainBeginTask - 1]}_{type(model.nnet).__name__}_blip.tar"
+        if isinstance(model, OthelloNetWrapper):
+            fileName = f"{tasks[trainBeginTask - 1]}_{type(model.nnet).__name__}.tar"
+        else:
+            fileName = f"{tasks[trainBeginTask - 1]}_{type(model.nnet).__name__}_blip.tar"
         model.load_checkpoint(folder= './model', filename= fileName)
 
     for (task, param) in enumerate(tasks):
         if task < trainBeginTask:
             continue
         
-        model.prepareNextTask(task)
+        model.prepareNextTask(task, expandThreshold= expandThreshold)
         model.setCurrTask(task)
         log.info(f'task {task}: {param}')
         game = OthelloGameWrapper(param)
         coach = Coach(game, model, args)
-        coach.learn()
+        trainExamples = coach.learn()
         model.save_checkpoint(folder= './model', filename= f'{param}_{type(model.nnet).__name__}.tar')
 
         if isinstance(model, PQNetWrapper):
-            trainExamples = []
-            with open(f'./temp/PQNetWrapper_{param}_checkpoint_{args.numIters - 1}.pth.tar.examples', "rb") as f:
-                trainExamplesHistory = Unpickler(f).load()
-                for e in trainExamplesHistory:
-                    trainExamples.extend(e)
-            estimate_fisher(task, f'cuda:{GPU_NUM}', model, trainExamples)
-            for m in model.nnet.modules():
-                if isinstance(m, Linear_Q) or isinstance(m, Conv2d_Q):
-                    # update bits according to information gain
-                    m.update_bits(task=task, C=0.5/math.log(2))
-                    # do quantization
-                    m.sync_weight()
-                    # update Fisher in the buffer
-                    m.update_fisher(task=task)
+            model.applyBlip(f"cuda:{GPU_NUM}", trainExamples)
             freezeResult = used_capacity(model.nnet, 20)
             for (name, info) in freezeResult[1]:
                 log.info(f"{name}: {info}")

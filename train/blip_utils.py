@@ -41,7 +41,7 @@ def batch_conv(x, weight, bias=None, stride=1, padding=0, dilation=1, groups=1):
 def update_Fisher(model):
     #for m in model.features.modules():
     for m in model.modules():
-        if isinstance(m, Conv2d_Q):
+        if isinstance(m, Conv2d_Q) and m.updateFisher:
             # conv layer
             # smart batch conv version
             # extend state to (N,1,C,H,W)

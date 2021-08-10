@@ -65,43 +65,39 @@ if __name__ == "__main__":
     import torch
     from train.network.othelloNetWrapper import OthelloNetWrapper
     from trainTasks import tasks
-
-    # GPU_NUM = 1
-    # device = torch.device(f"cuda:{GPU_NUM}") if torch.cuda.is_available() else "cpu"
-    # torch.cuda.set_device(device)
-    taskIdx = 3
-    # ModelType = OthelloNetWrapper
-    ModelType = OthelloNetWrapper
-    model = ModelType(OthelloGameWrapper(tasks[taskIdx]))
-    model.load_checkpoint(folder= "./model", filename= "(8, 8)_cross_OthelloFCNNet.tar")
-    # model.load_checkpoint(folder= "./model", filename= "{'boardSize': (8, 8), 'mode': 'default', 'blockPosType': 'cross'}_PQFCNNet_blip.tar")
-    # model.prepareNextTask(3)
-    model.setCurrTask(0)
-    player0 = AIPlayer(OthelloGameWrapper(tasks[taskIdx]), model)
-    player1 = RandomPlayer()
-
+    
     import random
-    pos = [(row,col) for col in range(3) for row in range(3)]
-    # pos = [(0,1), (1,2), (2,2)]
-    # shuffle(pos)
-    # blocks = []
-    # for i in range(3):
-    #     blocks.append(pos[i])
-    #     blocks.append((pos[i][0], 7 - pos[i][1]))
-    #     blocks.append((7 - pos[i][0], pos[i][1]))
-    #     blocks.append((7 - pos[i][0], 7 - pos[i][1]))
-    # board = Board((8,8))
-    # board.setBlock(blocks)
-    # board.printBoard()
+    boardSize = (8,8)
+    pos = [(row,col) for col in range(int(boardSize[1] / 2) - 1) for row in range(int(boardSize[0] / 2) - 1)]
+    shuffle(pos)
+    blocks = []
+    for i in range(4):
+        blocks.append(pos[i])
+        blocks.append((pos[i][0], boardSize[1] - pos[i][1] - 1))
+        blocks.append((boardSize[0] - pos[i][0] - 1, pos[i][1]))
+        blocks.append((boardSize[0] - pos[i][0] - 1, boardSize[1] - pos[i][1] - 1))
+    board = Board(boardSize)
+    board.setBlock(blocks)
+    board.printBoard()
 
-    wins = [0,0]
-    for i in range(100):
-        board = Board(**tasks[3])
-        # board.setBlock(blocks)
-        game = Game(board, (player0, player1))
-        winner = game.play(printBoard= False)
-        if winner != None:
-            wins[winner] = wins[winner] + 1
+    ModelType = OthelloNetWrapper
+
+    setting = {"boardSize" : boardSize, "mode" : "desdemona", "blockPosType" : "none"}
+
+    for taskIdx in range(4):
+        model = ModelType(OthelloGameWrapper(tasks[taskIdx]))
+        model.load_checkpoint(folder= "./model", filename= f"{tasks[taskIdx]}_{type(model.nnet).__name__}.tar")
+        model.setCurrTask(taskIdx)
+        player0 = AIPlayer(OthelloGameWrapper(setting), model)
+        player1 = RandomPlayer()
+        wins = [0,0]
+        for i in range(100):
+            board = Board(**setting)
+            board.setBlock(blocks)
+            game = Game(board, (player0, player1))
+            winner = game.play(printBoard= False)
+            if winner != None:
+                wins[winner] = wins[winner] + 1
         print(wins)
 
             

@@ -121,6 +121,7 @@ class Conv2d_Q(nn.Conv2d):
             padding=0, dilation=1, groups=1, bias=True, max_bit=20, F_prior=1e-18):
         super(Conv2d_Q, self).__init__(in_channels, out_channels, kernel_size, stride, 
             padding, dilation, groups, bias)
+        self.updateFisher = True
         self.max_bit = max_bit
         self.bound = 6.0*math.sqrt(1.0/(in_channels*kernel_size*kernel_size))
         # dealing each layer's prior separately

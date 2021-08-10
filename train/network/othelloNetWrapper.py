@@ -18,7 +18,7 @@ args = dotdict({
     'epochs': 10,
     'batch_size': 64,
     'cuda': torch.cuda.is_available(),
-    'num_channels': 512,
+    'num_channels': 256,
 })
 
 class OthelloNetWrapper(NeuralNet):
@@ -33,7 +33,7 @@ class OthelloNetWrapper(NeuralNet):
     def setCurrTask(self, task):
         self.currTask = task
     
-    def prepareNextTask(self, nextTask):
+    def prepareNextTask(self, nextTask, expandThreshold):
         if nextTask != 0:
             self.nnet.valueFc.extendLayer(nextTask)
             self.nnet.piFc.extendLayer(nextTask)
