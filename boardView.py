@@ -1,6 +1,6 @@
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QApplication, QHBoxLayout, QLabel, QMessageBox, QVBoxLayout, QWidget, QPushButton, QGridLayout
+from PyQt5.QtWidgets import QApplication, QHBoxLayout, QLabel, QLayout, QMessageBox, QVBoxLayout, QWidget, QPushButton, QGridLayout
 
 class BoardView(QWidget):
     def __init__(self, boardSize):
@@ -26,9 +26,10 @@ class BoardView(QWidget):
 
         #set layout
         gridSize = self.getProperGridSize()
+        nameLabelSizeRatio = colSize / 2 - 1
         statusLayout = QGridLayout()
         for nameLabels in self.playerNameLabels:
-            nameLabels.setFixedWidth(gridSize * 3)
+            nameLabels.setFixedWidth(gridSize * nameLabelSizeRatio)
         for scoreLabels in self.playerScoreLabels:
             scoreLabels.setFixedWidth(gridSize)
         statusLayout.addWidget(self.playerNameLabels[0], 0, 0)
@@ -41,10 +42,11 @@ class BoardView(QWidget):
         statusLayout.setColumnStretch(3, colSize / 2 - 1)
 
         gridLayout = QGridLayout()
+        gridLayout.setContentsMargins(1,1,1,1)
         for row in range(rowSize):
             for col in range(colSize):
-                self.grids[row][col].setFixedHeight(gridSize)
                 self.grids[row][col].setFixedWidth(gridSize)
+                self.grids[row][col].setFixedHeight(gridSize)
                 gridLayout.addWidget(self.grids[row][col], row + 1, col)
         
         mainLayout = QGridLayout()
@@ -53,9 +55,6 @@ class BoardView(QWidget):
         mainLayout.addLayout(gridLayout, 1, 0)
         mainLayout.setRowStretch(1, self.scoreBoardToGridRatio)
         self.setLayout(mainLayout)
-        properScreenSize = self.getProperGridSize()
-        print(properScreenSize)
-        # self.setFixedSize(properScreenSize[1], properScreenSize[0])
     
     def getProperGridSize(self):
         (rowSize, colSize) = self.boardSize
@@ -75,6 +74,12 @@ class BoardView(QWidget):
     def setGridText(self, pos, text):
         (row, col) = pos
         self.grids[row][col].setText(text)
+
+    def setGridIsUnplaceable(self, pos, isPlaceable):
+        (row, col) = pos
+        if isPlaceable == True:
+            self.grids[row][col].setObjectName("unplaceable")
+        self.updateWidgetStyle(self.grids[row][col])
 
     def setGridIsPlaced(self, pos, isPlaced):
         (row, col) = pos

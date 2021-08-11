@@ -13,6 +13,11 @@ QPushButton#placed {
     font-size: 50px;
 }
 
+QPushButton#unplaceable {
+    background-color: rgba(0,10,0,0.3);
+    font-size: 50px;
+}
+
 QLabel {
     qproperty-alignment: AlignCenter; 
     font-size: 30px;

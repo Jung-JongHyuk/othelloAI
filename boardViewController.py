@@ -17,6 +17,7 @@ class BoardViewController:
         self.prevBoard = copy.deepcopy(self.board)
         self.Players = (DummyPlayer(), RandomPlayer())
         self.game = Game(self.board, self.Players)
+        self.showPlaceablePos = True
         self.lastPlacedPos = []
         self.view.setPlayerName(0, f"{type(self.Players[0]).__name__} {self.view.icons[0]}")
         self.view.setPlayerName(1, f"{self.view.icons[1]} {type(self.Players[1]).__name__}")
@@ -24,6 +25,7 @@ class BoardViewController:
             self.view.setStyleSheet(qss.read())
         self.proceedGame()
         self.connectEventHandler()
+        self.setBlock()
         self.updateView()
     
     def connectEventHandler(self):
@@ -47,6 +49,14 @@ class BoardViewController:
             print(self.game.getCurrPlayer(), nonHumanPlayerDecision)
             self.game.adoptDecision(nonHumanPlayerDecision)
     
+    # update block in view
+    def setBlock(self):
+        (rowSize, colSize) = self.boardSize
+        for row in range(rowSize):
+            for col in range(colSize):
+                if self.board.board[row][col] == self.board.BLOCK:
+                    self.view.setGridIsUnplaceable((row,col), True)
+
     def updateView(self):
         (rowSize, colSize) = self.boardSize
         # update piece
@@ -58,7 +68,8 @@ class BoardViewController:
         # update placeable pos and enable click
         placeableCoordinates = self.board.getPlaceableCoordinates(self.game.currPlayerIndex)
         for coordinate in placeableCoordinates:
-            self.view.setGridText(coordinate, self.view.placeableIcons[self.game.currPlayerIndex])
+            if self.showPlaceablePos:
+                self.view.setGridText(coordinate, self.view.placeableIcons[self.game.currPlayerIndex])
             self.view.setGridClickEnabled(coordinate, True)
 
         # update changed and placed pos
@@ -71,6 +82,8 @@ class BoardViewController:
         
         for pos in self.lastPlacedPos:
             self.view.setGridIsPlaced(pos, True)
+        
+        self.setBlock()
 
         # update score board
         boardStatus = self.board.getBoardStatus()

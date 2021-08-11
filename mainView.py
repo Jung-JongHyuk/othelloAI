@@ -76,6 +76,7 @@ class MainView(QWidget):
         settingBox.setLayout(settingLayout)
         mainLayout.addWidget(settingBox, 0, 1)
         self.setLayout(mainLayout)
+        self.setMaximumWidth(0) # set window width to minimum
     
     def getInput(self):
         kwargs = {}
