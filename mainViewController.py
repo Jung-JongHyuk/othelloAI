@@ -9,9 +9,13 @@ class MainViewController:
         self.connectEventHandler()
     
     def connectEventHandler(self):
-        self.view.gameStartButton.clicked.connect(self.getInputAndOpenBoardView)
+        self.view.blockPosTypeComboBox.currentTextChanged.connect(self.openBlockPosInputBoardWindow)
+        self.view.gameStartButton.clicked.connect(self.getGameSettingInputAndOpenBoardWindow)
 
-    def getInputAndOpenBoardView(self):
+    def openBlockPosInputBoardWindow(self, blockPosType):
+        print(blockPosType)
+
+    def getGameSettingInputAndOpenBoardWindow(self):
         kwargs = self.view.getInput()
         BoardViewController(**kwargs)
 

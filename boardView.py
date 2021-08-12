@@ -1,6 +1,6 @@
 from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QApplication, QHBoxLayout, QLabel, QLayout, QMessageBox, QVBoxLayout, QWidget, QPushButton, QGridLayout
+from PyQt5.QtWidgets import *
 
 class BoardView(QWidget):
     def __init__(self, boardSize):
@@ -20,9 +20,6 @@ class BoardView(QWidget):
         #init UI element
         self.setWindowTitle("Othello")
         self.grids = [[QPushButton('', self) for col in range(colSize)] for row in range(rowSize)]
-        for row in range(rowSize):
-            for col in range(colSize):
-                self.grids[row][col].setMaximumHeight(500)
 
         #set layout
         gridSize = self.getProperGridSize()
@@ -42,7 +39,6 @@ class BoardView(QWidget):
         statusLayout.setColumnStretch(3, colSize / 2 - 1)
 
         gridLayout = QGridLayout()
-        gridLayout.setContentsMargins(1,1,1,1)
         for row in range(rowSize):
             for col in range(colSize):
                 self.grids[row][col].setFixedWidth(gridSize)
