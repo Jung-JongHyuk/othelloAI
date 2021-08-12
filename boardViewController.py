@@ -21,8 +21,6 @@ class BoardViewController:
         self.lastPlacedPos = []
         self.view.setPlayerName(0, f"{type(self.Players[0]).__name__} {self.view.icons[0]}")
         self.view.setPlayerName(1, f"{self.view.icons[1]} {type(self.Players[1]).__name__}")
-        with open("./boardView.qss", 'r') as qss:
-            self.view.setStyleSheet(qss.read())
         self.proceedGame()
         self.connectEventHandler()
         self.setBlock()
@@ -32,7 +30,7 @@ class BoardViewController:
         (rowSize, colSize) = self.boardSize
         for row in range(rowSize):
             for col in range(colSize):
-                self.view.grids[row][col].clicked.connect(lambda state, pos=(row,col): self.onGridClicked(pos))
+                self.view.setGridClickedEventHandler((row,col), lambda state, pos=(row,col): self.onGridClicked(pos))
 
     def onGridClicked(self, pos):
         self.game.adoptDecision(pos)

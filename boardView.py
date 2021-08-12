@@ -1,6 +1,7 @@
 from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import *
+from boardWidget import BoardWidget
 
 class BoardView(QWidget):
     def __init__(self, boardSize):
@@ -8,10 +9,12 @@ class BoardView(QWidget):
         self.icons = ["🔵", "🟠", "", "🪨", "⚫️"]
         self.placeableIcons = ["🔹", "🔸"]
         self.boardSize = boardSize
-        self.grids = None
         self.scoreBoardToGridRatio = 10
+        self.boardWidget = BoardWidget(self.boardSize, self.getProperGridSize())
         self.playerNameLabels = [QLabel("1", self), QLabel("2", self)]
         self.playerScoreLabels = [QLabel("3", self), QLabel("4", self)]
+        with open("./boardView.qss", 'r') as qss:
+            self.setStyleSheet(qss.read())
         self.initView()
         self.show()
 
@@ -19,9 +22,8 @@ class BoardView(QWidget):
         (rowSize, colSize) = self.boardSize
         #init UI element
         self.setWindowTitle("Othello")
-        self.grids = [[QPushButton('', self) for col in range(colSize)] for row in range(rowSize)]
 
-        #set layout
+        #set score board layout
         gridSize = self.getProperGridSize()
         nameLabelSizeRatio = colSize / 2 - 1
         statusLayout = QGridLayout()
@@ -37,18 +39,12 @@ class BoardView(QWidget):
         statusLayout.setColumnStretch(2, 1)
         statusLayout.addWidget(self.playerNameLabels[1], 0, 3)
         statusLayout.setColumnStretch(3, colSize / 2 - 1)
-
-        gridLayout = QGridLayout()
-        for row in range(rowSize):
-            for col in range(colSize):
-                self.grids[row][col].setFixedWidth(gridSize)
-                self.grids[row][col].setFixedHeight(gridSize)
-                gridLayout.addWidget(self.grids[row][col], row + 1, col)
         
+        #set window layout
         mainLayout = QGridLayout()
         mainLayout.addLayout(statusLayout, 0, 0)
         mainLayout.setRowStretch(0, 1)
-        mainLayout.addLayout(gridLayout, 1, 0)
+        mainLayout.addWidget(self.boardWidget, 1, 0)
         mainLayout.setRowStretch(1, self.scoreBoardToGridRatio)
         self.setLayout(mainLayout)
     
@@ -66,41 +62,25 @@ class BoardView(QWidget):
     
     def setPlayerScore(self, playerIdx, score):
         self.playerScoreLabels[playerIdx].setText(str(score))
+    
+    def setGridClickedEventHandler(self, pos, handler):
+        (row, col) = pos
+        self.boardWidget.grids[row][col].clicked.connect(handler)
 
     def setGridText(self, pos, text):
-        (row, col) = pos
-        self.grids[row][col].setText(text)
+        self.boardWidget.setGridText(pos, text)
 
     def setGridIsUnplaceable(self, pos, isPlaceable):
-        (row, col) = pos
-        if isPlaceable == True:
-            self.grids[row][col].setObjectName("unplaceable")
-        self.updateWidgetStyle(self.grids[row][col])
+        self.boardWidget.setGridIsUnplaceable(pos, isPlaceable)
 
     def setGridIsPlaced(self, pos, isPlaced):
-        (row, col) = pos
-        if isPlaced == True:
-            self.grids[row][col].setObjectName("placed")
-        else:
-            self.grids[row][col].setObjectName("")
-        self.updateWidgetStyle(self.grids[row][col])
+        self.boardWidget.setGridIsPlaced(pos, isPlaced)
 
     def setGridIsChanged(self, pos, isChanged):
-        (row, col) = pos
-        if isChanged == True:
-            self.grids[row][col].setObjectName("changed")
-        else:
-            self.grids[row][col].setObjectName("")
-        self.updateWidgetStyle(self.grids[row][col])
+        self.boardWidget.setGridIsChanged(pos, isChanged)
     
     def setGridClickEnabled(self, pos, clickEnabled):
-        (row, col) = pos
-        self.grids[row][col].setEnabled(clickEnabled)
-    
-    def updateWidgetStyle(self, widget):
-        widget.style().polish(widget)
-        widget.style().unpolish(widget)
-        widget.update()
+        self.boardWidget.setGridClickEnabled(pos, clickEnabled)
     
     def popAlert(self, message):
         msgBox = QMessageBox()

@@ -78,15 +78,17 @@ class MainView(QWidget):
         self.setLayout(mainLayout)
         self.setMaximumWidth(0) # set window width to minimum
     
-    def getInput(self):
+    def getGameSetting(self):
         kwargs = {}
         kwargs["player0"] = self.player0ComboBox.currentText()
         kwargs["player1"] = self.player1ComboBox.currentText()
         kwargs["boardSetting"] = {}
-        kwargs["boardSetting"]["boardSize"] = (int(self.rowSizeInput.text()), int(self.colSizeInput.text()))
         kwargs["boardSetting"]["blockPosType"] = self.blockPosTypeComboBox.currentText()
         kwargs["boardSetting"]["mode"] = self.gameModeComboBox.currentText()
-
+        if self.rowSizeInput.text() != "" and self.colSizeInput.text() != "":
+            kwargs["boardSetting"]["boardSize"] = (int(self.rowSizeInput.text()), int(self.colSizeInput.text()))
+        else:
+            kwargs["boardSetting"]["boardSize"] = (0,0)
         return kwargs
 
 if __name__ == "__main__":

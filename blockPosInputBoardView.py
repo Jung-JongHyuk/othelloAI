@@ -1,24 +1,21 @@
 from PyQt5.QtWidgets import *
+from boardWidget import BoardWidget
 
 class BlockPosInputBoardView(QWidget):
     def __init__(self, boardSize):
         super().__init__()
         self.boardSize = boardSize
+        self.boardWidget = BoardWidget(self.boardSize, self.getProperGridSize())
         self.initView()
         self.show()
     
     def initView(self):
         (rowSize, colSize) = self.boardSize
         self.setWindowTitle("Othello")
-        self.grids = [[QPushButton('', self) for col in range(colSize)] for row in range(rowSize)]
-        gridLayout = QGridLayout()
-        gridSize = self.getProperGridSize()
-        for row in range(rowSize):
-            for col in range(colSize):
-                self.grids[row][col].setFixedWidth(gridSize)
-                self.grids[row][col].setFixedHeight(gridSize)
-                gridLayout.addWidget(self.grids[row][col], row + 1, col)
-        self.setLayout(gridLayout)
+        mainLayout = QGridLayout()
+        mainLayout.addWidget(QPushButton("button"), 0, 0)
+        mainLayout.addWidget(self.boardWidget, 1, 0)
+        self.setLayout(mainLayout)
     
     def getProperGridSize(self):
         (rowSize, colSize) = self.boardSize
