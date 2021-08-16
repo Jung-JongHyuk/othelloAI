@@ -18,7 +18,8 @@ class Board:
             elif blockPosType == "octagon":
                 blockPos = self.makeOctagonBlockPos()
             elif blockPosType == "custom":
-                blockPos = self.makeSymmetricBlockPos(customBlockPos)
+                # blockPos = self.makeSymmetricBlockPos(customBlockPos)
+                blockPos = customBlockPos
 
             elif blockPosType != "none":
                 print("invalid blockPosType")

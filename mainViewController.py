@@ -22,6 +22,8 @@ class MainViewController:
 
     def getGameSettingInputAndOpenBoardWindow(self):
         self.gameSetting = self.view.getGameSetting()
+        if self.gameSetting["boardSetting"]["blockPosType"] == "custom" and self.blockPosInputBoardViewController != None:
+            self.gameSetting["boardSetting"]["customBlockPos"] = self.blockPosInputBoardViewController.getBlockPos()
         self.boardViewController = BoardViewController(**self.gameSetting)
 
 if __name__ == "__main__":
