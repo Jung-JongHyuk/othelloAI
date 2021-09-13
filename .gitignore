@@ -8,4 +8,7 @@ presentation/
 model/
 model_512/
 model_256/
+model_expThr_0.7/
+model_expThr_0.8/
+model_PG/
 fisherTest.py

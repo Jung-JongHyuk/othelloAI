@@ -51,7 +51,7 @@ def main():
     GPU_NUM = 2
     trainBeginTask = 2
     ModelType = PQNetWrapper
-    expandThreshold = 0.7
+    expandThreshold = [1,1,0.8,0.73]
 
     device = torch.device(f"cuda:{GPU_NUM}") if torch.cuda.is_available() else "cpu"
     torch.cuda.set_device(device)
@@ -62,13 +62,13 @@ def main():
             fileName = f"{tasks[trainBeginTask - 1]}_{type(model.nnet).__name__}.tar"
         else:
             fileName = f"{tasks[trainBeginTask - 1]}_{type(model.nnet).__name__}_blip.tar"
-        model.load_checkpoint(folder= './model', filename= fileName)
+        model.load_checkpoint(folder= './model_expThr_0.7', filename= fileName)
 
     for (task, param) in enumerate(tasks):
         if task < trainBeginTask:
             continue
         
-        model.prepareNextTask(task, expandThreshold= expandThreshold)
+        model.prepareNextTask(task, expandThreshold= expandThreshold[task])
         model.setCurrTask(task)
         log.info(f'task {task}: {param}')
         game = OthelloGameWrapper(param)
