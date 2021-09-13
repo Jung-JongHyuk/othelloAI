@@ -34,7 +34,7 @@ class OthelloNetWrapper(NeuralNet):
         self.currTask = task
     
     def prepareNextTask(self, nextTask, expandThreshold):
-        if nextTask != 0:
+        if nextTask != 0 and expandThreshold < 1:
             self.nnet.valueFc.extendLayer(nextTask)
             self.nnet.piFc.extendLayer(nextTask)
             self.nnet.conv7.extendLayer(nextTask)
