@@ -85,8 +85,9 @@ class EWCWrapper(NeuralNet):
                 optimizer.step()
     
     def updateEWC(self, oldExamples):
-        self.oldExamples += random.sample(oldExamples, self.args.oldExamplesSampleSize)
-        self.ewc = EWC(self.nnet, list(map(lambda example: example[0], self.oldExamples)))
+        self.oldExamples += random.sample(oldExamples, min(args.oldExampleSampleSize, len(oldExamples)))
+        # print(self.oldExamples[0][0])
+        self.ewc = EWC(self.nnet, self.currTask, list(map(lambda example: torch.Tensor(example[0].astype(np.int32).copy()), self.oldExamples)))
 
     def predict(self, board):
         """
@@ -128,8 +129,4 @@ class EWCWrapper(NeuralNet):
             raise ("No model in path {}".format(filepath))
         map_location = None if args.cuda else 'cpu'
         checkpoint = torch.load(filepath, map_location=map_location)
-        self.nnet.load_state_dict(checkpoint['state_dict'], strict= False)
-        for m in self.nnet.modules():
-            if isinstance(m, ExtendableLayer):
-                m.fitLayerSize()
         self.nnet.load_state_dict(checkpoint['state_dict'])

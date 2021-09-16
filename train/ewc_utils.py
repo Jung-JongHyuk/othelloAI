@@ -14,10 +14,11 @@ def variable(t: torch.Tensor, use_cuda=True, **kwargs):
 
 
 class EWC(object):
-    def __init__(self, model: nn.Module, dataset: list):
+    def __init__(self, model: nn.Module, currTask, dataset: list):
 
         self.model = model
         self.dataset = dataset
+        self.currTask = currTask
 
         self.params = {n: p for n, p in self.model.named_parameters() if p.requires_grad}
         self._means = {}
@@ -35,14 +36,18 @@ class EWC(object):
         self.model.eval()
         for input in self.dataset:
             self.model.zero_grad()
-            input = variable(input)
-            output = self.model(input).view(1, -1)
+            input = variable(input).view(1, input.shape[0], input.shape[1])
+            output = self.model(input, self.currTask)[0].view(1, -1)
+            # print(output)
             label = output.max(1)[1].view(-1)
-            loss = F.nll_loss(F.log_softmax(output, dim=1), label)
+            # print(label)
+            loss = F.nll_loss(output, label)
+            # print(loss)
             loss.backward()
 
             for n, p in self.model.named_parameters():
-                precision_matrices[n].data += p.grad.data ** 2 / len(self.dataset)
+                if p.grad != None:
+                    precision_matrices[n].data += p.grad.data ** 2 / len(self.dataset)
 
         precision_matrices = {n: p for n, p in precision_matrices.items()}
         return precision_matrices

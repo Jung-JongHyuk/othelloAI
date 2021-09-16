@@ -8,6 +8,7 @@ from train.othelloGameWrapper import OthelloGameWrapper
 from train.network.othelloNetWrapper import OthelloNetWrapper
 from train.network.QNetWrapper import QNetWrapper
 from train.network.PQNetWrapper import PQNetWrapper
+from train.network.ewcWrapper import EWCWrapper
 from train.utils import *
 from train.blip_utils import *
 from trainTasks import tasks
@@ -31,13 +32,13 @@ log.addHandler(streamHandler)
 log.addHandler(fileHandler)
 
 args = dotdict({
-    'numIters': 30,
-    'numEps': 100,              # Number of complete self-play games to simulate during a new iteration.
+    'numIters': 1,
+    'numEps': 1,              # Number of complete self-play games to simulate during a new iteration.
     'tempThreshold': 15,        #
     'updateThreshold': 0.6,     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
     'maxlenOfQueue': 200000,    # Number of game examples to train the neural networks.
     'numMCTSSims': 25,          # Number of games moves for MCTS to simulate.
-    'arenaCompare': 40,         # Number of games to play during arena play to determine if new net will be accepted.
+    'arenaCompare': 2,         # Number of games to play during arena play to determine if new net will be accepted.
     'cpuct': 1,
 
     'checkpoint': './temp/',
@@ -49,8 +50,8 @@ args = dotdict({
 
 def main():
     GPU_NUM = 2
-    trainBeginTask = 2
-    ModelType = PQNetWrapper
+    trainBeginTask = 0
+    ModelType = EWCWrapper
     expandThreshold = [1,1,0.8,0.73]
 
     device = torch.device(f"cuda:{GPU_NUM}") if torch.cuda.is_available() else "cpu"
@@ -83,6 +84,8 @@ def main():
                 log.info(f"{name}: {info}")
             log.info(f'used capacity: {freezeResult[0]}')
             model.save_checkpoint(folder= './model', filename= f'{param}_{type(model.nnet).__name__}_blip.tar')
+        elif isinstance(model, EWCWrapper):
+            model.updateEWC(trainExamples)
 
 if __name__ == "__main__":
     main()
