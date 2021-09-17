@@ -6,6 +6,7 @@ import sys
 import os
 from tqdm import tqdm
 from .NeuralNet import NeuralNet
+from .ExtendableLayer import ExtendableLayer
 from .othelloFCNNet import OthelloFCNNet
 sys.path.append('../')
 from train.utils import *
@@ -13,7 +14,7 @@ from train.ewc_utils import EWC
 
 args = dotdict({
     'lr': 0.001,
-    'ewcWeight': 1000,
+    'ewcWeight': 3000,
     'oldExampleSampleSize': 200,
     'dropout': 0.3,
     'epochs': 10,
@@ -37,7 +38,10 @@ class EWCWrapper(NeuralNet):
         self.currTask = task
     
     def prepareNextTask(self, nextTask, expandThreshold):
-        return
+        if nextTask != 0 and expandThreshold < 1:
+            self.nnet.valueFc.extendLayer(nextTask)
+            self.nnet.piFc.extendLayer(nextTask)
+            self.nnet.conv7.extendLayer(nextTask)
 
     def train(self, examples):
         """
@@ -129,4 +133,8 @@ class EWCWrapper(NeuralNet):
             raise ("No model in path {}".format(filepath))
         map_location = None if args.cuda else 'cpu'
         checkpoint = torch.load(filepath, map_location=map_location)
+        self.nnet.load_state_dict(checkpoint['state_dict'], strict= False)
+        for m in self.nnet.modules():
+            if isinstance(m, ExtendableLayer):
+                m.fitLayerSize()
         self.nnet.load_state_dict(checkpoint['state_dict'])
