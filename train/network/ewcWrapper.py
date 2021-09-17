@@ -91,7 +91,7 @@ class EWCWrapper(NeuralNet):
     def updateEWC(self, oldExamples):
         self.oldExamples += random.sample(oldExamples, min(args.oldExampleSampleSize, len(oldExamples)))
         # print(self.oldExamples[0][0])
-        self.ewc = EWC(self.nnet, self.currTask, list(map(lambda example: torch.Tensor(example[0].astype(np.int32).copy()), self.oldExamples)))
+        self.ewc = EWC(self.nnet, self.currTask, list(map(lambda example: torch.FloatTensor(example[0].astype(np.float64)), self.oldExamples)))
 
     def predict(self, board):
         """
