@@ -14,8 +14,8 @@ from train.ewc_utils import EWC
 
 args = dotdict({
     'lr': 0.001,
-    'ewcWeight': 3000,
-    'oldExampleSampleSize': 200,
+    'ewcWeight': 1000,
+    'oldExampleSampleSize': 2000,
     'dropout': 0.3,
     'epochs': 10,
     'batch_size': 64,
@@ -75,7 +75,7 @@ class EWCWrapper(NeuralNet):
                 l_v = self.loss_v(target_vs, out_v)
                 total_loss = l_pi + l_v
 
-                if self.currTask != 0:
+                if self.currTask != 0 and self.ewc != None:
                     total_loss += args.ewcWeight * self.ewc.penalty(self.nnet)
 
                 # record loss
@@ -89,9 +89,10 @@ class EWCWrapper(NeuralNet):
                 optimizer.step()
     
     def updateEWC(self, oldExamples):
-        self.oldExamples += random.sample(oldExamples, min(args.oldExampleSampleSize, len(oldExamples)))
-        # print(self.oldExamples[0][0])
-        self.ewc = EWC(self.nnet, self.currTask, list(map(lambda example: torch.FloatTensor(example[0].astype(np.float64)), self.oldExamples)))
+        sampledExamples = random.sample(oldExamples, min(args.oldExampleSampleSize, len(oldExamples)))
+        sampledExamples = list(map(lambda example: torch.FloatTensor(example[0].astype(np.float64)), sampledExamples))
+        self.oldExamples.append(sampledExamples)
+        self.ewc = EWC(self.nnet, self.oldExamples)
 
     def predict(self, board):
         """

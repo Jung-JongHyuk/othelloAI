@@ -14,11 +14,10 @@ def variable(t: torch.Tensor, use_cuda=True, **kwargs):
 
 
 class EWC(object):
-    def __init__(self, model: nn.Module, currTask, dataset: list):
+    def __init__(self, model: nn.Module, dataset: list):
 
         self.model = model
         self.dataset = dataset
-        self.currTask = currTask
 
         self.params = {n: p for n, p in self.model.named_parameters() if p.requires_grad}
         self._means = {}
@@ -34,23 +33,30 @@ class EWC(object):
             precision_matrices[n] = variable(p.data)
 
         self.model.eval()
-        for input in self.dataset:
-            self.model.zero_grad()
-            input = variable(input).view(1, input.shape[0], input.shape[1])
-            output = self.model(input, self.currTask)[0].view(1, -1)
-            # print(output)
-            label = output.max(1)[1].view(-1)
-            # print(label)
-            loss = F.nll_loss(output, label)
-            # print(loss)
-            loss.backward()
+        for taskIdx in range(len(self.dataset)):
+            for input in self.dataset[taskIdx]:
+                self.model.zero_grad()
+                input = variable(input).view(1, input.shape[0], input.shape[1])
+                output = self.model(input, taskIdx)[0].view(1, -1)
+                label = output.max(1)[1].view(-1)
 
-            for n, p in self.model.named_parameters():
-                if p.grad != None:
-                    precision_matrices[n].data += p.grad.data ** 2 / len(self.dataset)
+                actionSize = output.shape[1]
+                oneHotLabel = torch.zeros((1, actionSize))
+                if torch.cuda.is_available():
+                    oneHotLabel = oneHotLabel.cuda()
+                oneHotLabel[0, label] = 1
+                loss = self.loss_pi(output, oneHotLabel)
+                loss.backward()
+
+                for n, p in self.model.named_parameters():
+                    if p.grad != None:
+                        precision_matrices[n].data += p.grad.data ** 2 / len(self.dataset)
 
         precision_matrices = {n: p for n, p in precision_matrices.items()}
         return precision_matrices
+    
+    def loss_pi(self, targets, outputs):
+        return -torch.sum(targets * outputs) / targets.size()[0]
 
     def penalty(self, model: nn.Module):
         loss = 0
