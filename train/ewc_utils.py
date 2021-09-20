@@ -32,6 +32,7 @@ class EWC(object):
             p.data.zero_()
             precision_matrices[n] = variable(p.data)
 
+        datasetSize = self.getDatasetSize()
         self.model.eval()
         for taskIdx in range(len(self.dataset)):
             for input in self.dataset[taskIdx]:
@@ -50,13 +51,19 @@ class EWC(object):
 
                 for n, p in self.model.named_parameters():
                     if p.grad != None:
-                        precision_matrices[n].data += p.grad.data ** 2 / len(self.dataset)
+                        precision_matrices[n].data += p.grad.data ** 2 / datasetSize
 
         precision_matrices = {n: p for n, p in precision_matrices.items()}
         return precision_matrices
     
     def loss_pi(self, targets, outputs):
         return -torch.sum(targets * outputs) / targets.size()[0]
+    
+    def getDatasetSize(self):
+        count = 0
+        for task in range(len(self.dataset)):
+            count += len(self.dataset[task])
+        return count
 
     def penalty(self, model: nn.Module):
         loss = 0
